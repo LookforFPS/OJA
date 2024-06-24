@@ -1,11 +1,11 @@
-package me.lookforfps.oja.chatcompletion.entity.response;
+package me.lookforfps.oja.chatcompletion.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import me.lookforfps.oja.chatcompletion.entity.Message;
-import me.lookforfps.oja.chatcompletion.entity.content.TextContent;
-import me.lookforfps.oja.chatcompletion.entity.response.logprobs.LogProbs;
+import me.lookforfps.oja.chatcompletion.content.TextContent;
+import me.lookforfps.oja.chatcompletion.response.logprobs.LogProbs;
 
 @Data
 @AllArgsConstructor

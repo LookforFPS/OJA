@@ -2,8 +2,8 @@ package me.lookforfps.oja.chatcompletion.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.lookforfps.oja.chatcompletion.entity.content.ContentList;
-import me.lookforfps.oja.chatcompletion.entity.toolcall.ToolCall;
+import me.lookforfps.oja.chatcompletion.content.ContentList;
+import me.lookforfps.oja.chatcompletion.toolcall.ToolCall;
 
 import java.util.List;
 

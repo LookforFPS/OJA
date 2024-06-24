@@ -23,7 +23,7 @@ public class ChatCompletionConfiguration {
      * <br>
      * <b>defaultValue: </b><code>true</code>
      */
-    private boolean autoAddAIResponseToContext = true;
+    private Boolean autoAddAIResponseToContext = true;
     /**
      * <b>Description: </b>
      * Number between -2.0 and 2.0.

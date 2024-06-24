@@ -8,13 +8,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import me.lookforfps.oja.chatcompletion.entity.Message;
-import me.lookforfps.oja.chatcompletion.entity.content.ContentList;
-import me.lookforfps.oja.chatcompletion.entity.request.ChatCompletionRequestDto;
-import me.lookforfps.oja.chatcompletion.entity.response.ChatCompletionResponse;
-import me.lookforfps.oja.chatcompletion.entity.response.ChatCompletionResponseDto;
-import me.lookforfps.oja.chatcompletion.entity.response.Choice;
-import me.lookforfps.oja.chatcompletion.entity.response.logprobs.LogProbs;
-import me.lookforfps.oja.chatcompletion.entity.toolcall.ToolCall;
+import me.lookforfps.oja.chatcompletion.content.ContentList;
+import me.lookforfps.oja.chatcompletion.response.ChatCompletionResponseDto;
+import me.lookforfps.oja.chatcompletion.response.Choice;
+import me.lookforfps.oja.chatcompletion.response.logprobs.LogProbs;
+import me.lookforfps.oja.chatcompletion.streaming.Chunk;
+import me.lookforfps.oja.chatcompletion.streaming.ChunkDto;
+import me.lookforfps.oja.chatcompletion.toolcall.ToolCall;
 import me.lookforfps.oja.entity.RequestDto;
 import me.lookforfps.oja.entity.ResponseDto;
 
@@ -84,11 +84,15 @@ public class MappingService {
     public Choice jsonNodeToChoice(JsonNode choiceJsonNode) throws JsonProcessingException {
         Choice choice = new Choice();
         choice.setIndex(choiceJsonNode.get("index").asInt());
-        choice.setFinish_reason(choiceJsonNode.get("finish_reason").asText());
+        if(choiceJsonNode.get("finish_reason") != null) {
+            choice.setFinish_reason(choiceJsonNode.get("finish_reason").asText());
+        }
         if (choiceJsonNode.get("logprobs") != null) {
             choice.setLogprobs(mapper.treeToValue(choiceJsonNode.get("logprobs"), LogProbs.class));
         }
-        choice.setMessage(jsonNodeToMessage(choiceJsonNode.get("message")));
+        if(choiceJsonNode.get("message") != null) {
+            choice.setMessage(jsonNodeToMessage(choiceJsonNode.get("message")));
+        }
 
         return choice;
     }
@@ -107,5 +111,24 @@ public class MappingService {
             message.setTool_call_id((messageJsonNode.get("tool_call_id").asText()));
         }
         return message;
+    }
+
+    public Chunk bytesToChunk(byte[] chunkBytes) throws IOException {
+        ChunkDto chunkDto = mapper.readValue(chunkBytes, ChunkDto.class);
+        return chunkDtoToChunk(chunkDto);
+    }
+
+    public Chunk chunkDtoToChunk(ChunkDto chunkDto) {
+        Chunk chunk = new Chunk();
+        chunk.setId(chunkDto.getId());
+        chunk.setUsedModel(chunkDto.getModel());
+        chunk.setObject(chunkDto.getObject());
+        chunk.setCreated(chunkDto.getCreated());
+        chunk.setServiceTier(chunkDto.getService_tier());
+        chunk.setUsage(chunkDto.getUsage());
+        chunk.setSystemFingerprint(chunkDto.getSystem_fingerprint());
+        chunk.setChoices(chunkDto.getChoices());
+
+        return chunk;
     }
 }

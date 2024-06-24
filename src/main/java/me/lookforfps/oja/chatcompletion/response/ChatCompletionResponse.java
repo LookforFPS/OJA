@@ -1,9 +1,9 @@
-package me.lookforfps.oja.chatcompletion.entity.response;
+package me.lookforfps.oja.chatcompletion.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.lookforfps.oja.chatcompletion.entity.content.TextContent;
+import me.lookforfps.oja.chatcompletion.content.TextContent;
 
 import java.util.List;
 

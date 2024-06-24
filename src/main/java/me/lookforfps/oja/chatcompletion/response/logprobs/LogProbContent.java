@@ -1,13 +1,15 @@
-package me.lookforfps.oja.chatcompletion.entity.response.logprobs;
+package me.lookforfps.oja.chatcompletion.response.logprobs;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TopLogProb {
+public class LogProbContent {
     /**
      * <b>Description: </b>
      * The token.
@@ -25,4 +27,9 @@ public class TopLogProb {
      * Can be <code>null</code> if there is no bytes representation for the token.
      */
     private Byte[] bytes;
+    /**
+     * <b>Description: </b>
+     * List of the most likely tokens and their log probability, at this token position. In rare cases, there may be fewer than the number of requested <code>top_logprobs</code> returned.
+     */
+    private List<TopLogProb> top_logprobs;
 }

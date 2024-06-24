@@ -1,12 +1,5 @@
 package me.lookforfps.oja.chatcompletion;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -63,18 +56,18 @@ public class ChatCompletion {
         con.setDoOutput(true);
         con.getOutputStream().write(mappingService.requestDtoToBytes(request));
 
-        log.info("request: "+mappingService.requestDtoToString(request));
+        log.debug("request: "+mappingService.requestDtoToString(request));
 
         String output = new BufferedReader(new InputStreamReader(con.getInputStream())).lines()
                 .reduce((a, b) -> a + b).get();
 
-        log.info("response: "+output);
+        log.debug("response: "+output);
 
         ChatCompletionResponseDto response = mappingService.bytesToResponseDto(output.getBytes(), ChatCompletionResponseDto.class);
 
-        log.info("processedResponse: "+mappingService.responseDtoToString(response));
+        log.debug("processedResponse: "+mappingService.responseDtoToString(response));
 
-        if(config.isAutoAddAIResponseToContext()) {
+        if(config.getAutoAddAIResponseToContext()) {
             addMessage(response.getChoices().get(0).getMessage());
         }
 

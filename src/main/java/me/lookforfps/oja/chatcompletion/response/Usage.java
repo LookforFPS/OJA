@@ -1,4 +1,4 @@
-package me.lookforfps.oja.chatcompletion.entity.response;
+package me.lookforfps.oja.chatcompletion.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
