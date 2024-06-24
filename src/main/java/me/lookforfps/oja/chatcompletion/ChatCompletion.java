@@ -11,13 +11,17 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import me.lookforfps.oja.chatcompletion.config.ChatCompletionConfiguration;
+import me.lookforfps.oja.chatcompletion.request.ChatCompletionRequestDto;
+import me.lookforfps.oja.chatcompletion.content.ContentList;
+import me.lookforfps.oja.chatcompletion.response.ChatCompletionResponse;
+import me.lookforfps.oja.chatcompletion.response.ChatCompletionResponseDto;
 import me.lookforfps.oja.chatcompletion.entity.Message;
-import me.lookforfps.oja.chatcompletion.entity.request.ChatCompletionRequestDto;
-import me.lookforfps.oja.chatcompletion.entity.content.ContentList;
-import me.lookforfps.oja.chatcompletion.entity.response.ChatCompletionResponse;
-import me.lookforfps.oja.chatcompletion.entity.response.ChatCompletionResponseDto;
-import me.lookforfps.oja.chatcompletion.entity.response.Choice;
+import me.lookforfps.oja.chatcompletion.streaming.Chunk;
+import me.lookforfps.oja.chatcompletion.streaming.Stream;
+import me.lookforfps.oja.chatcompletion.streaming.StreamListener;
 import me.lookforfps.oja.chatcompletion.mapping.MappingService;
+import me.lookforfps.oja.chatcompletion.streaming.event.ChunkStreamedEvent;
+import me.lookforfps.oja.chatcompletion.streaming.event.StreamStoppedEvent;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,6 +30,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 @Slf4j
 public class ChatCompletion {
@@ -36,15 +41,16 @@ public class ChatCompletion {
     @Getter
     @Setter
     private List<Message> messages = new ArrayList<>();
-    private MappingService mappingService;
+    private final MappingService mappingService;
 
     public ChatCompletion(ChatCompletionConfiguration configuration) {
         this.config = configuration;
-
         this.mappingService = new MappingService();
     }
 
     public ChatCompletionResponse sendRequest() throws IOException {
+        config.setStream(false);
+
         ChatCompletionRequestDto request = buildRequest();
 
         String url = "https://api.openai.com/v1/chat/completions";
@@ -73,6 +79,69 @@ public class ChatCompletion {
         }
 
         return buildResponse(response);
+    }
+
+    public Stream sendStreamRequest() throws IOException {
+        return sendStreamRequest(null);
+    }
+
+    public Stream sendStreamRequest(StreamListener listener) {
+        config.setStream(true);
+
+        Stream stream = new Stream();
+        if (listener != null) {
+            stream.addStreamListener(listener);
+        }
+
+        Thread streamThread = new Thread(() -> {
+            try {
+                ChatCompletionRequestDto request = buildRequest();
+
+                String url = "https://api.openai.com/v1/chat/completions";
+                HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+
+                con.setRequestMethod("POST");
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setRequestProperty("Authorization", "Bearer " + config.getApiToken());
+
+                con.setDoOutput(true);
+                con.getOutputStream().write(mappingService.requestDtoToBytes(request));
+
+                log.info("request: " + mappingService.requestDtoToString(request));
+
+                Scanner scanner = new Scanner(con.getInputStream());
+
+                while (scanner.hasNextLine()) {
+                    String line = scanner.nextLine();
+                    line = line.replace("data: ", "");
+                    log.info("chunk: " + line);
+
+                    if(line.equalsIgnoreCase("[DONE]")) {
+                        StreamStoppedEvent event = new StreamStoppedEvent("done"); // TODO reason anpassen
+                        stream.emitStreamStopped(event);
+
+                        log.info("stream stopped");
+                        break;
+                    } else if(line.equalsIgnoreCase("")) {
+                        log.info("empty chunk skipped");
+                    } else {
+                        Chunk chunk = mappingService.bytesToChunk(line.getBytes());
+
+                        ChunkStreamedEvent chunkStreamedEvent = new ChunkStreamedEvent(chunk);
+                        stream.emitChunkStreamed(chunkStreamedEvent);
+                        log.info("chunk shared");
+                    }
+                }
+                scanner.close();
+            } catch(IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        streamThread.setName("ChatCompletion-Stream");
+        streamThread.start();
+
+
+        return stream;
     }
 
     private ChatCompletionRequestDto buildRequest() {
