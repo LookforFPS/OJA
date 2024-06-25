@@ -26,7 +26,7 @@ public class ChatCompletionRequestDto extends RequestDto {
     private Integer seed;
     private String service_tier;
     private List<String> stop;
-    private Boolean stream; // TODO implementation
+    private Boolean stream;
     private Object stream_options;
     private Float temperature;
     private Float top_p;

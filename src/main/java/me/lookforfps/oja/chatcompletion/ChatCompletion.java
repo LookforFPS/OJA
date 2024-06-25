@@ -14,7 +14,6 @@ import me.lookforfps.oja.chatcompletion.streaming.Stream;
 import me.lookforfps.oja.chatcompletion.streaming.StreamListener;
 import me.lookforfps.oja.chatcompletion.mapping.MappingService;
 import me.lookforfps.oja.chatcompletion.streaming.event.ChunkStreamedEvent;
-import me.lookforfps.oja.chatcompletion.streaming.event.StreamStoppedEvent;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -78,7 +77,7 @@ public class ChatCompletion {
         return sendStreamRequest(null);
     }
 
-    public Stream sendStreamRequest(StreamListener listener) {
+    public Stream sendStreamRequest(StreamListener listener) throws IOException {
         config.setStream(true);
 
         Stream stream = new Stream();
@@ -100,32 +99,42 @@ public class ChatCompletion {
                 con.setDoOutput(true);
                 con.getOutputStream().write(mappingService.requestDtoToBytes(request));
 
-                log.info("request: " + mappingService.requestDtoToString(request));
+                log.debug("request: " + mappingService.requestDtoToString(request));
 
                 Scanner scanner = new Scanner(con.getInputStream());
 
                 while (scanner.hasNextLine()) {
                     String line = scanner.nextLine();
-                    line = line.replace("data: ", "");
-                    log.info("chunk: " + line);
+                    String output = line.replace("data: ", "");
+                    log.debug("response: "+output);
 
-                    if(line.equalsIgnoreCase("[DONE]")) {
-                        StreamStoppedEvent event = new StreamStoppedEvent("done"); // TODO reason anpassen
-                        stream.emitStreamStopped(event);
-
-                        log.info("stream stopped");
+                    if(output.equalsIgnoreCase("[DONE]")) {
+                        stream.emitStreamStopped();
+                        log.debug("stream stopped");
                         break;
-                    } else if(line.equalsIgnoreCase("")) {
-                        log.info("empty chunk skipped");
-                    } else {
-                        Chunk chunk = mappingService.bytesToChunk(line.getBytes());
+                    } else if(output.equalsIgnoreCase("")) {
+                        log.debug("empty chunk skipped");
+                    } else if(line.startsWith("data:")) {
 
-                        ChunkStreamedEvent chunkStreamedEvent = new ChunkStreamedEvent(chunk);
-                        stream.emitChunkStreamed(chunkStreamedEvent);
-                        log.info("chunk shared");
+                        Chunk chunk = mappingService.bytesToChunk(output.getBytes());
+                        if(chunk.getChoices().get(0).getDelta().getContent() == null) {
+                            log.debug("empty chunk skipped");
+                        } else {
+                            ChunkStreamedEvent chunkStreamedEvent = new ChunkStreamedEvent(chunk);
+                            stream.emitChunkStreamed(chunkStreamedEvent);
+                            stream.addTextToContent(chunk.getChoices().get(0).getDelta().getContent());
+                            log.debug("chunk shared");
+                        }
+                    } else {
+                        log.error("Error during classifying chunk!");
                     }
                 }
                 scanner.close();
+
+                if(config.getAutoAddAIResponseToContext()) {
+                    log.warn("Automatically adding AI responses to context is currently not available for streaming!");
+                    //addMessage(new Message(MessageRole.ASSISTENT.getIdentifier(), ContentList.addTextContent(stream.getContent())));
+                }
             } catch(IOException ex) {
                 throw new RuntimeException(ex);
             }

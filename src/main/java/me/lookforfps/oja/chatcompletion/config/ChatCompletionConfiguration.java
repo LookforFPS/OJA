@@ -92,7 +92,7 @@ public class ChatCompletionConfiguration {
      * If set, partial message deltas will be sent, like in ChatGPT.
      * Tokens will be sent as data-only <b>server-sent events</b> as they become available, with the stream terminated by a <code>data: [DONE]</code> message.
      */
-    private Boolean stream; // TODO implementation
+    private Boolean stream;
     /**
      * <b>Description: </b>
      * Options for streaming response. Only set this when you set <code>stream: true</code>.

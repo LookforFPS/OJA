@@ -1,8 +1,8 @@
 package me.lookforfps.oja.chatcompletion.streaming;
 
 import lombok.Getter;
+import lombok.Setter;
 import me.lookforfps.oja.chatcompletion.streaming.event.ChunkStreamedEvent;
-import me.lookforfps.oja.chatcompletion.streaming.event.StreamStoppedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,9 @@ public class Stream {
     private List<StreamListener> listeners = new ArrayList<StreamListener>();
     @Getter
     private boolean streamStopped = false;
+    @Getter
+    @Setter
+    private String content = "";
 
     public void addStreamListener(StreamListener listener) {
         listeners.add(listener);
@@ -27,10 +30,14 @@ public class Stream {
         }
     }
 
-    public void emitStreamStopped(StreamStoppedEvent event) {
+    public void emitStreamStopped() {
         streamStopped = true;
         for (StreamListener listener : listeners) {
-            listener.onStreamStopped(event);
+            listener.onStreamStopped();
         }
+    }
+
+    public void addTextToContent(String text) {
+        content += text;
     }
 }
