@@ -3,17 +3,17 @@ package me.lookforfps.oja.chatcompletion;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import me.lookforfps.oja.chatcompletion.config.ChatCompletionConfiguration;
-import me.lookforfps.oja.chatcompletion.request.ChatCompletionRequestDto;
-import me.lookforfps.oja.chatcompletion.content.ContentList;
-import me.lookforfps.oja.chatcompletion.response.ChatCompletionResponse;
-import me.lookforfps.oja.chatcompletion.response.ChatCompletionResponseDto;
-import me.lookforfps.oja.chatcompletion.entity.Message;
-import me.lookforfps.oja.chatcompletion.streaming.Chunk;
-import me.lookforfps.oja.chatcompletion.streaming.Stream;
-import me.lookforfps.oja.chatcompletion.streaming.StreamListener;
+import me.lookforfps.oja.chatcompletion.model.natives.config.ChatCompletionConfiguration;
+import me.lookforfps.oja.chatcompletion.model.natives.request.ChatCompletionRequestDto;
+import me.lookforfps.oja.chatcompletion.model.natives.content.ContentList;
+import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponse;
+import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponseDto;
+import me.lookforfps.oja.chatcompletion.model.natives.message.Message;
+import me.lookforfps.oja.chatcompletion.model.streaming.chunk.Chunk;
+import me.lookforfps.oja.chatcompletion.model.streaming.Stream;
+import me.lookforfps.oja.chatcompletion.hook.StreamListener;
 import me.lookforfps.oja.chatcompletion.mapping.MappingService;
-import me.lookforfps.oja.chatcompletion.streaming.event.ChunkStreamedEvent;
+import me.lookforfps.oja.chatcompletion.event.ChunkStreamedEvent;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -120,9 +120,9 @@ public class ChatCompletion {
                         if(chunk.getChoices().get(0).getDelta().getContent() == null) {
                             log.debug("empty chunk skipped");
                         } else {
+                            stream.updateChoices(chunk.getChoices());
                             ChunkStreamedEvent chunkStreamedEvent = new ChunkStreamedEvent(chunk);
                             stream.emitChunkStreamed(chunkStreamedEvent);
-                            stream.addTextToContent(chunk.getChoices().get(0).getDelta().getContent());
                             log.debug("chunk shared");
                         }
                     } else {
@@ -149,7 +149,7 @@ public class ChatCompletion {
     private ChatCompletionRequestDto buildRequest() {
         ChatCompletionRequestDto request = new ChatCompletionRequestDto();
 
-        request.setModel(config.getModel().getIdentifier());
+        request.setModel(config.getAIModel().getIdentifier());
         request.setMessages(messages);
 
         request.setFrequency_penalty(config.getFrequencyPenalty());
