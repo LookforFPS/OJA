@@ -3,7 +3,7 @@ package me.lookforfps.oja.chatcompletion.model.natives.message;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import me.lookforfps.oja.chatcompletion.model.natives.content.ContentList;
-import me.lookforfps.oja.chatcompletion.model.natives.toolcall.ToolCall;
+import me.lookforfps.oja.chatcompletion.model.natives.tools.ToolCall;
 
 import java.util.List;
 

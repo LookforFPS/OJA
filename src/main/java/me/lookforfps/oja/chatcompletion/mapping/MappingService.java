@@ -14,7 +14,7 @@ import me.lookforfps.oja.chatcompletion.model.natives.response.Choice;
 import me.lookforfps.oja.chatcompletion.model.natives.logprobs.LogProbs;
 import me.lookforfps.oja.chatcompletion.model.streaming.chunk.Chunk;
 import me.lookforfps.oja.chatcompletion.model.streaming.chunk.ChunkDto;
-import me.lookforfps.oja.chatcompletion.model.natives.toolcall.ToolCall;
+import me.lookforfps.oja.chatcompletion.model.natives.tools.ToolCall;
 import me.lookforfps.oja.model.RequestDto;
 import me.lookforfps.oja.model.ResponseDto;
 
