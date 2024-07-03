@@ -1,13 +1,9 @@
 package me.lookforfps.oja;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import me.lookforfps.oja.chatcompletion.ChatCompletion;
 import me.lookforfps.oja.aimodel.AIModel;
 import me.lookforfps.oja.chatcompletion.model.natives.config.ChatCompletionConfiguration;
 
-@Data
-@AllArgsConstructor
 public class OJABuilder {
 
     public static ChatCompletion createChatCompletion(String apiToken, AIModel AIModel, ChatCompletionConfiguration configuration) {

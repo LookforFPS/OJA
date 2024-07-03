@@ -44,33 +44,20 @@ public class ChatCompletion {
         config.setStream(false);
 
         ChatCompletionRequestDto request = buildRequest();
+        HttpURLConnection con = buildConnection();
 
-        String url = "https://api.openai.com/v1/chat/completions";
-        HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
-
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("Authorization", "Bearer "+config.getApiToken());
-
-        con.setDoOutput(true);
         con.getOutputStream().write(mappingService.requestDtoToBytes(request));
-
-        log.debug("request: "+mappingService.requestDtoToString(request));
 
         String output = new BufferedReader(new InputStreamReader(con.getInputStream())).lines()
                 .reduce((a, b) -> a + b).get();
 
-        log.debug("response: "+output);
-
-        ChatCompletionResponseDto response = mappingService.bytesToResponseDto(output.getBytes(), ChatCompletionResponseDto.class);
-
-        log.debug("processedResponse: "+mappingService.responseDtoToString(response));
+        ChatCompletionResponse response = buildResponse(output);
 
         if(config.getAutoAddAIResponseToContext()) {
-            addMessage(response.getChoices().get(0).getMessage());
+            addMessage(response.getChoices().get(config.getAutoAddAIResponseChoiceIndex()).getMessage());
         }
 
-        return buildResponse(response);
+        return response;
     }
 
     public Stream sendStreamRequest() throws IOException {
@@ -88,45 +75,14 @@ public class ChatCompletion {
         Thread streamThread = new Thread(() -> {
             try {
                 ChatCompletionRequestDto request = buildRequest();
+                HttpURLConnection con = buildConnection();
 
-                String url = "https://api.openai.com/v1/chat/completions";
-                HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
-
-                con.setRequestMethod("POST");
-                con.setRequestProperty("Content-Type", "application/json");
-                con.setRequestProperty("Authorization", "Bearer " + config.getApiToken());
-
-                con.setDoOutput(true);
                 con.getOutputStream().write(mappingService.requestDtoToBytes(request));
 
-                log.debug("request: " + mappingService.requestDtoToString(request));
-
                 Scanner scanner = new Scanner(con.getInputStream());
-
                 while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    String output = line.replace("data: ", "");
-                    log.debug("response: "+output);
-
-                    if(output.equalsIgnoreCase("[DONE]")) {
-                        stream.emitStreamStopped();
-                        log.debug("stream stopped");
+                    if(classifyChunk(stream, scanner.nextLine())) {
                         break;
-                    } else if(output.equalsIgnoreCase("")) {
-                        log.debug("empty chunk skipped");
-                    } else if(line.startsWith("data:")) {
-
-                        Chunk chunk = mappingService.bytesToChunk(output.getBytes());
-                        if(chunk.getChoices().get(0).getDelta().getContent() == null) {
-                            log.debug("empty chunk skipped");
-                        } else {
-                            stream.updateChoices(chunk.getChoices());
-                            ChunkStreamedEvent chunkStreamedEvent = new ChunkStreamedEvent(chunk);
-                            stream.emitChunkStreamed(chunkStreamedEvent);
-                            log.debug("chunk shared");
-                        }
-                    } else {
-                        log.error("Error during classifying chunk!");
                     }
                 }
                 scanner.close();
@@ -145,7 +101,7 @@ public class ChatCompletion {
         return stream;
     }
 
-    private ChatCompletionRequestDto buildRequest() {
+    private ChatCompletionRequestDto buildRequest() throws IOException {
         ChatCompletionRequestDto request = new ChatCompletionRequestDto();
 
         request.setModel(config.getAIModel().getIdentifier());
@@ -170,10 +126,28 @@ public class ChatCompletion {
         request.setParallel_tool_calls(config.getParallelToolCalls());
         request.setUser(config.getUser());
 
+        log.debug("requestDto: " + mappingService.requestDtoToString(request));
+
         return request;
     }
 
-    private ChatCompletionResponse buildResponse(ChatCompletionResponseDto responseDto) {
+    private HttpURLConnection buildConnection() throws IOException {
+        HttpURLConnection con = (HttpURLConnection) new URL(config.getApiUrl()).openConnection();
+
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestProperty("Authorization", "Bearer " + config.getApiToken());
+
+        con.setDoOutput(true);
+        return con;
+    }
+
+    private ChatCompletionResponse buildResponse(String rawResponse) throws IOException {
+        log.debug("rawResponse: "+rawResponse);
+
+        ChatCompletionResponseDto responseDto = mappingService.bytesToResponseDto(rawResponse.getBytes(), ChatCompletionResponseDto.class);
+        log.debug("processedResponseDto: "+mappingService.responseDtoToString(responseDto));
+
         ChatCompletionResponse response = new ChatCompletionResponse();
 
         response.setId(responseDto.getId());
@@ -186,6 +160,33 @@ public class ChatCompletion {
         response.setServiceTier(responseDto.getService_tier());
 
         return response;
+    }
+
+    private boolean classifyChunk(Stream stream, String rawChunk) throws IOException {
+        String output = rawChunk.replace("data: ", "");
+        log.debug("chunkResponse: "+output);
+
+        if(output.equalsIgnoreCase("[DONE]")) {
+            stream.emitStreamStopped();
+            log.debug("stream stopped");
+            return true;
+        } else if(output.equalsIgnoreCase("")) {
+            log.debug("empty chunk skipped");
+        } else if(rawChunk.startsWith("data:")) {
+
+            Chunk chunk = mappingService.bytesToChunk(output.getBytes());
+            if(chunk.getChoices().get(0).getDelta().getContent() == null) {
+                log.debug("empty chunk skipped");
+            } else {
+                stream.updateChoices(chunk.getChoices());
+                ChunkStreamedEvent chunkStreamedEvent = new ChunkStreamedEvent(chunk);
+                stream.emitChunkStreamed(chunkStreamedEvent);
+                log.debug("chunk shared");
+            }
+        } else {
+            log.error("Error during classifying chunk!");
+        }
+        return false;
     }
 
     public ChatCompletion addMessage(Message message) {

@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 public class ChatCompletionConfiguration {
 
+    private String apiUrl = "https://api.openai.com/v1/chat/completions";
     private String apiToken;
     /**
      * <b>Description: </b>
@@ -22,6 +23,7 @@ public class ChatCompletionConfiguration {
      * <b>defaultValue: </b><code>true</code>
      */
     private Boolean autoAddAIResponseToContext = true;
+    private Integer autoAddAIResponseChoiceIndex = 0;
     /**
      * <b>Description: </b>
      * Number between -2.0 and 2.0.
