@@ -18,10 +18,13 @@ public class OJABuilder {
         configuration.setAIModel(AIModel);
         return new ChatCompletion(configuration);
     }
+    public static ChatCompletion createChatCompletion(String apiToken, String modelIdentifier, ChatCompletionConfiguration configuration) {
+        return createChatCompletion(apiToken, new AIModel(modelIdentifier), configuration);
+    }
     public static ChatCompletion createChatCompletion(String apiToken, AIModel AIModel) {
         return createChatCompletion(apiToken, AIModel, null);
     }
     public static ChatCompletion createChatCompletion(String apiToken, String modelIdentifier) {
-        return createChatCompletion(apiToken, new AIModel(modelIdentifier, null));
+        return createChatCompletion(apiToken, new AIModel(modelIdentifier));
     }
 }
