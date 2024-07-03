@@ -9,5 +9,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AIModel {
     private String identifier;
-    private String label;
 }
