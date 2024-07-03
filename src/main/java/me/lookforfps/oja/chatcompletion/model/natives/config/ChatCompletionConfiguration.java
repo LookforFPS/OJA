@@ -14,7 +14,7 @@ public class ChatCompletionConfiguration {
      * <b>Description: </b>
      * ID of the model to use.
      */
-    private AIModel AIModel; // TODO required
+    private AIModel AIModel;
     /**
      * <b>Description: </b>
      * Specifies if the response, from the AI, should be automatically added to the context.
@@ -62,7 +62,6 @@ public class ChatCompletionConfiguration {
      * Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.
      */
     private Float presencePenalty;
-    //private Object response_format; TODO implementation
     /**
      * <b>Description: </b>
      * This feature is in Beta.

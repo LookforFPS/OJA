@@ -133,7 +133,6 @@ public class ChatCompletion {
 
                 if(config.getAutoAddAIResponseToContext()) {
                     log.warn("Automatically adding AI responses to context is currently not available for streaming!");
-                    //addMessage(new Message(MessageRole.ASSISTENT.getIdentifier(), ContentList.addTextContent(stream.getContent())));
                 }
             } catch(IOException ex) {
                 throw new RuntimeException(ex);

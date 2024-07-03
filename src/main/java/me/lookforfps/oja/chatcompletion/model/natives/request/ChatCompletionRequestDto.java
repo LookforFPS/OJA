@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChatCompletionRequestDto extends RequestDto {
-    private String model; // TODO required
+    private String model;
     private List<Message> messages;
     private Float frequency_penalty;
     private HashMap<String, Integer> logit_bias;
@@ -22,7 +22,6 @@ public class ChatCompletionRequestDto extends RequestDto {
     private Integer max_tokens;
     private Integer n;
     private Float presence_penalty;
-    //private Object response_format; TODO implementation
     private Integer seed;
     private String service_tier;
     private List<String> stop;
