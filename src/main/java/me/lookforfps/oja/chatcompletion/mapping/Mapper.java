@@ -22,45 +22,44 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MappingService {
+public class Mapper {
 
-    ObjectMapper mapper;
-    ObjectWriter writer;
+    private ObjectMapper objectMapper;
+    private ObjectWriter objectWriter;
 
-    public MappingService() {
-        this.mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        this.writer = mapper.writerWithDefaultPrettyPrinter();
+    public Mapper() {
+        this.objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        this.objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
     }
 
     public String responseDtoToString(ResponseDto responseDto) throws JsonProcessingException {
-        return writer.writeValueAsString(responseDto);
+        return objectWriter.writeValueAsString(responseDto);
     }
 
     public String requestDtoToString(RequestDto requestDto) throws JsonProcessingException {
-        return writer.writeValueAsString(requestDto);
+        return objectWriter.writeValueAsString(requestDto);
     }
 
     public byte[] requestDtoToBytes(RequestDto requestDto) throws JsonProcessingException {
-        return writer.writeValueAsBytes(requestDto);
+        return objectWriter.writeValueAsBytes(requestDto);
     }
 
     public <T> T bytesToResponseDto(byte[] bytes, Class<T> responseType) throws IOException {
         if(responseType.equals(ChatCompletionResponseDto.class)) {
             return (T) bytesToChatCompletionResponseDto(bytes);
         }
-
-        return mapper.readValue(bytes, responseType);
+        return objectMapper.readValue(bytes, responseType);
     }
 
     private ChatCompletionResponseDto bytesToChatCompletionResponseDto(byte[] bytes) throws IOException {
-        JsonNode responseJsonNode = mapper.readTree(bytes);
+        JsonNode responseJsonNode = objectMapper.readTree(bytes);
         List<Choice> choices = jsonNodesToChoiceList(responseJsonNode.get("choices"));
 
-        ((ObjectNode) responseJsonNode).set("choices", mapper.readTree("[]"));
-        bytes = mapper.writeValueAsBytes(responseJsonNode);
+        ((ObjectNode) responseJsonNode).set("choices", objectMapper.readTree("[]"));
+        bytes = objectMapper.writeValueAsBytes(responseJsonNode);
 
-        ChatCompletionResponseDto responseDto = mapper.readValue(bytes, ChatCompletionResponseDto.class);
+        ChatCompletionResponseDto responseDto = objectMapper.readValue(bytes, ChatCompletionResponseDto.class);
 
         responseDto.setChoices(choices);
 
@@ -88,7 +87,7 @@ public class MappingService {
             choice.setFinish_reason(choiceJsonNode.get("finish_reason").asText());
         }
         if (choiceJsonNode.get("logprobs") != null) {
-            choice.setLogprobs(mapper.treeToValue(choiceJsonNode.get("logprobs"), LogProbs.class));
+            choice.setLogprobs(objectMapper.treeToValue(choiceJsonNode.get("logprobs"), LogProbs.class));
         }
         if(choiceJsonNode.get("message") != null) {
             choice.setMessage(jsonNodeToMessage(choiceJsonNode.get("message")));
@@ -105,7 +104,7 @@ public class MappingService {
             message.setName(messageJsonNode.get("name").asText());
         }
         if(messageJsonNode.get("tool_calls") != null) {
-            message.setTool_calls(mapper.treeToValue(messageJsonNode.get("tool_calls"), new TypeReference<List<ToolCall>>() {}));
+            message.setTool_calls(objectMapper.treeToValue(messageJsonNode.get("tool_calls"), new TypeReference<List<ToolCall>>() {}));
         }
         if(messageJsonNode.get("tool_call_id") != null) {
             message.setTool_call_id((messageJsonNode.get("tool_call_id").asText()));
@@ -114,7 +113,7 @@ public class MappingService {
     }
 
     public Chunk bytesToChunk(byte[] chunkBytes) throws IOException {
-        ChunkDto chunkDto = mapper.readValue(chunkBytes, ChunkDto.class);
+        ChunkDto chunkDto = objectMapper.readValue(chunkBytes, ChunkDto.class);
         return chunkDtoToChunk(chunkDto);
     }
 
