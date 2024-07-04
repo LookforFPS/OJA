@@ -12,7 +12,7 @@ import me.lookforfps.oja.chatcompletion.model.natives.message.Message;
 import me.lookforfps.oja.chatcompletion.model.streaming.chunk.Chunk;
 import me.lookforfps.oja.chatcompletion.model.streaming.Stream;
 import me.lookforfps.oja.chatcompletion.hook.StreamListener;
-import me.lookforfps.oja.chatcompletion.mapping.MappingService;
+import me.lookforfps.oja.chatcompletion.mapping.Mapper;
 import me.lookforfps.oja.chatcompletion.event.ChunkStreamedEvent;
 
 import java.io.BufferedReader;
@@ -33,23 +33,25 @@ public class ChatCompletion {
     @Getter
     @Setter
     private List<Message> messages = new ArrayList<>();
-    private final MappingService mappingService;
+    private final Mapper mapper;
 
     public ChatCompletion(ChatCompletionConfiguration configuration) {
         this.config = configuration;
-        this.mappingService = new MappingService();
+        this.mapper = new Mapper();
     }
 
     public ChatCompletionResponse sendRequest() throws IOException {
         config.setStream(false);
 
-        ChatCompletionRequestDto request = buildRequest();
+        byte[] request = buildRequest();
         HttpURLConnection con = buildConnection();
 
-        con.getOutputStream().write(mappingService.requestDtoToBytes(request));
+        con.getOutputStream().write(request);
 
         String output = new BufferedReader(new InputStreamReader(con.getInputStream())).lines()
                 .reduce((a, b) -> a + b).get();
+
+        con.disconnect();
 
         ChatCompletionResponse response = buildResponse(output);
 
@@ -74,10 +76,10 @@ public class ChatCompletion {
 
         Thread streamThread = new Thread(() -> {
             try {
-                ChatCompletionRequestDto request = buildRequest();
+                byte[] request = buildRequest();
                 HttpURLConnection con = buildConnection();
 
-                con.getOutputStream().write(mappingService.requestDtoToBytes(request));
+                con.getOutputStream().write(request);
 
                 Scanner scanner = new Scanner(con.getInputStream());
                 while (scanner.hasNextLine()) {
@@ -86,6 +88,7 @@ public class ChatCompletion {
                     }
                 }
                 scanner.close();
+                con.disconnect();
 
                 if(config.getAutoAddAIResponseToContext()) {
                     log.warn("Automatically adding AI responses to context is currently not available for streaming!");
@@ -101,7 +104,7 @@ public class ChatCompletion {
         return stream;
     }
 
-    private ChatCompletionRequestDto buildRequest() throws IOException {
+    private byte[] buildRequest() throws IOException {
         ChatCompletionRequestDto request = new ChatCompletionRequestDto();
 
         request.setModel(config.getAIModel().getIdentifier());
@@ -126,9 +129,9 @@ public class ChatCompletion {
         request.setParallel_tool_calls(config.getParallelToolCalls());
         request.setUser(config.getUser());
 
-        log.debug("requestDto: " + mappingService.requestDtoToString(request));
+        log.debug("requestDto: " + mapper.requestDtoToString(request));
 
-        return request;
+        return mapper.requestDtoToBytes(request);
     }
 
     private HttpURLConnection buildConnection() throws IOException {
@@ -145,8 +148,8 @@ public class ChatCompletion {
     private ChatCompletionResponse buildResponse(String rawResponse) throws IOException {
         log.debug("rawResponse: "+rawResponse);
 
-        ChatCompletionResponseDto responseDto = mappingService.bytesToResponseDto(rawResponse.getBytes(), ChatCompletionResponseDto.class);
-        log.debug("processedResponseDto: "+mappingService.responseDtoToString(responseDto));
+        ChatCompletionResponseDto responseDto = mapper.bytesToResponseDto(rawResponse.getBytes(), ChatCompletionResponseDto.class);
+        log.debug("processedResponseDto: "+ mapper.responseDtoToString(responseDto));
 
         ChatCompletionResponse response = new ChatCompletionResponse();
 
@@ -173,8 +176,8 @@ public class ChatCompletion {
         } else if(output.equalsIgnoreCase("")) {
             log.debug("empty chunk skipped");
         } else if(rawChunk.startsWith("data:")) {
+            Chunk chunk = mapper.bytesToChunk(output.getBytes());
 
-            Chunk chunk = mappingService.bytesToChunk(output.getBytes());
             if(chunk.getChoices().get(0).getDelta().getContent() == null) {
                 log.debug("empty chunk skipped");
             } else {
