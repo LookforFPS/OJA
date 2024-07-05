@@ -2,7 +2,9 @@ package me.lookforfps.oja.chatcompletion.model.natives.config;
 
 import lombok.Data;
 import me.lookforfps.oja.aimodel.AIModel;
+import me.lookforfps.oja.chatcompletion.model.natives.tools.Tool;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -117,14 +119,14 @@ public class ChatCompletionConfiguration {
      * A list of tools the model may call. Currently, only functions are supported as a tool.
      * Use this to provide a list of functions the model may generate JSON inputs for. A max of 128 functions are supported.
      */
-    private List<Object> tools;
+    private List<Tool> tools;
     /**
      * <b>Description: </b>
      * Controls which (if any) tool is called by the model. <code>none</code> means the model will not call any tool and instead generates a message. <code>auto</code> means the model can pick between generating a message or calling one or more tools. <code>required</code> means the model must call one or more tools. Specifying a particular tool via <code>{"type": "function", "function": {"name": "my_function"}}</code> forces the model to call that tool.
      * <br>
      * <code>none</code> is the default when no tools are present. <code>auto</code> is the default if tools are present.
      */
-    private Object toolChoice;
+    private String toolChoice;
     /**
      * <b>Description: </b>
      * Whether to enable parallel function calling during tool use.
@@ -135,4 +137,17 @@ public class ChatCompletionConfiguration {
      * A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
      */
     private String user;
+
+    public void addTool(Tool tool) {
+        if(tools == null) {
+            tools = new ArrayList<Tool>();
+        }
+        tools.add(tool);
+    }
+    public void removeTool(Tool tool) {
+        tools.remove(tool);
+    }
+    public void removeTool(int toolIndex) {
+        tools.remove(toolIndex);
+    }
 }

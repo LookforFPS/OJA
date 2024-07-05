@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ToolCall {
+    private Integer index;
     private String id;
     private String type;
     private FunctionCall function;

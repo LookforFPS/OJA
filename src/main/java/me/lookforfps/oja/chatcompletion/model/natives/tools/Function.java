@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Function {
-    private String description;
     private String name;
-    private Object parameters; // TODO improvements
+    private String description;
+    private Parameters parameters;
 }

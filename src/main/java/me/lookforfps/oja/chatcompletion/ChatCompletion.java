@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import me.lookforfps.oja.chatcompletion.model.natives.config.ChatCompletionConfiguration;
+import me.lookforfps.oja.chatcompletion.model.natives.message.MessageRole;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ChatCompletionRequestDto;
 import me.lookforfps.oja.chatcompletion.model.natives.content.ContentList;
 import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponse;
@@ -177,8 +178,7 @@ public class ChatCompletion {
             log.debug("empty chunk skipped");
         } else if(rawChunk.startsWith("data:")) {
             Chunk chunk = mapper.bytesToChunk(output.getBytes());
-
-            if(chunk.getChoices().get(0).getDelta().getContent() == null) {
+            if(chunk.getChoices().get(0).getDelta().getContent() == null && chunk.getChoices().get(0).getDelta().getTool_calls() == null) {
                 log.debug("empty chunk skipped");
             } else {
                 stream.updateChoices(chunk.getChoices());
@@ -196,24 +196,24 @@ public class ChatCompletion {
         messages.add(message);
         return this;
     }
-    public ChatCompletion addImageMessage(String role, String imageUrl, String additionText) {
+    public ChatCompletion addImageMessage(MessageRole role, String imageUrl, String additionText) {
         addMessage(new Message(role, ContentList.addImageWithTextContent(imageUrl, additionText)));
         return this;
     }
-    public ChatCompletion addImageMessage(String role, String imageUrl) {
+    public ChatCompletion addImageMessage(MessageRole role, String imageUrl) {
         addMessage(new Message(role, ContentList.addImageContent(imageUrl)));
         return this;
     }
     public ChatCompletion addImageMessage(String imageUrl) {
-        addImageMessage("user", imageUrl);
+        addImageMessage(MessageRole.USER, imageUrl);
         return this;
     }
-    public ChatCompletion addTextMessage(String role, String text) {
+    public ChatCompletion addTextMessage(MessageRole role, String text) {
         addMessage(new Message(role, ContentList.addTextContent(text)));
         return this;
     }
     public ChatCompletion addTextMessage(String text) {
-        addTextMessage("user", text);
+        addTextMessage(MessageRole.USER, text);
         return this;
     }
     public ChatCompletion removeMessage(int index) {

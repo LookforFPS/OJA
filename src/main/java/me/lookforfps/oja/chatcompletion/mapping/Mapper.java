@@ -106,9 +106,6 @@ public class Mapper {
         if(messageJsonNode.get("tool_calls") != null) {
             message.setTool_calls(objectMapper.treeToValue(messageJsonNode.get("tool_calls"), new TypeReference<List<ToolCall>>() {}));
         }
-        if(messageJsonNode.get("tool_call_id") != null) {
-            message.setTool_call_id((messageJsonNode.get("tool_call_id").asText()));
-        }
         return message;
     }
 
