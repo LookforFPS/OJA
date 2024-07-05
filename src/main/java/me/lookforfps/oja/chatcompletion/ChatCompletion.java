@@ -105,33 +105,33 @@ public class ChatCompletion {
     }
 
     private byte[] buildRequest() throws IOException {
-        ChatCompletionRequestDto request = new ChatCompletionRequestDto();
+        ChatCompletionRequestDto requestDto = new ChatCompletionRequestDto();
 
-        request.setModel(config.getAIModel().getIdentifier());
-        request.setMessages(messages);
+        requestDto.setModel(config.getAIModel().getIdentifier());
+        requestDto.setMessages(messages);
 
-        request.setFrequency_penalty(config.getFrequencyPenalty());
-        request.setLogit_bias(config.getLogitBias());
-        request.setLogprobs(config.getLogprobs());
-        request.setTop_logprobs(config.getTopLogprobs());
-        request.setMax_tokens(config.getMaxTokens());
-        request.setN(config.getChoices());
-        request.setPresence_penalty(config.getPresencePenalty());
-        request.setSeed(config.getSeed());
-        request.setService_tier(config.getServiceTier());
-        request.setStop(config.getStop());
-        request.setStream(config.getStream());
-        request.setStream_options(config.getStreamOptions());
-        request.setTemperature(config.getTemperature());
-        request.setTop_p(config.getTopP());
-        request.setTools(config.getTools());
-        request.setTool_choice(config.getToolChoice());
-        request.setParallel_tool_calls(config.getParallelToolCalls());
-        request.setUser(config.getUser());
+        requestDto.setFrequency_penalty(config.getFrequencyPenalty());
+        requestDto.setLogit_bias(config.getLogitBias());
+        requestDto.setLogprobs(config.getLogprobs());
+        requestDto.setTop_logprobs(config.getTopLogprobs());
+        requestDto.setMax_tokens(config.getMaxTokens());
+        requestDto.setN(config.getChoices());
+        requestDto.setPresence_penalty(config.getPresencePenalty());
+        requestDto.setSeed(config.getSeed());
+        requestDto.setService_tier(config.getServiceTier());
+        requestDto.setStop(config.getStop());
+        requestDto.setStream(config.getStream());
+        requestDto.setStream_options(config.getStreamOptions());
+        requestDto.setTemperature(config.getTemperature());
+        requestDto.setTop_p(config.getTopP());
+        requestDto.setTools(config.getTools());
+        requestDto.setTool_choice(config.getToolChoice());
+        requestDto.setParallel_tool_calls(config.getParallelToolCalls());
+        requestDto.setUser(config.getUser());
 
-        log.debug("requestDto: " + mapper.requestDtoToString(request));
+        log.debug("requestDto: " + mapper.requestDtoToString(requestDto));
 
-        return mapper.requestDtoToBytes(request);
+        return mapper.requestDtoToBytes(requestDto);
     }
 
     private HttpURLConnection buildConnection() throws IOException {
