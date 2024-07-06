@@ -110,12 +110,12 @@ configuration.addTool(new Tool(
                                 new String[]{"location"}, // required properties
                                 Property.create(
                                         "location", // name of property
-                                        PropertyType.STRING, // type of property
+                                        PropertyType.STRING.getIdentifier(), // type of property (string, integer, ...)
                                         "The city and state, e.g. San Francisco, CA" // description of property
                                         ),
                                 Property.create(
                                         "unit", // name of property
-                                        PropertyType.STRING, // type of property
+                                        PropertyType.STRING.getIdentifier(), // type of property (string, integer, ...)
                                         new String[] {"celsius", "fahrenheit"} // enum values for property
                                 )
                         )
