@@ -4,7 +4,7 @@ import me.lookforfps.oja.chatcompletion.ChatCompletion;
 import me.lookforfps.oja.aimodel.AIModel;
 import me.lookforfps.oja.chatcompletion.model.natives.config.ChatCompletionConfiguration;
 
-public class OJABuilder {
+public class OJA {
 
     public static ChatCompletion createChatCompletion(String apiToken, AIModel AIModel, ChatCompletionConfiguration configuration) {
         if(configuration==null) {

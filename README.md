@@ -15,20 +15,20 @@ Future updates will introduce additional functionalities, including the implemen
 
 ### Create ChatCompletion
 
-> The `ChatCompletion` object created by the `OJABuilder` can be used to add messages to the context and send requests to OpenAI.
+> The `ChatCompletion` object created by the `OJA` class can be used to add messages to the context and send requests to OpenAI.
 It is intended for reuse, as it maintains the chat context, which is included in each request.
 
-The OJABuilder offers several options to create a ChatCompletion object, depending on the information provided.
+The OJA offers several options to create a ChatCompletion object, depending on the information provided.
 
 #### Basic (API Token and Model)
 
 Specify the OpenAI API token and define the model using the ChatCompletionModel enum.
 ```java
-ChatCompletion chatCompletion = OJABuilder.createChatCompletion("put$your#api%token§here", ChatCompletionModel.GPT_3_5_TURBO.getAIModel());
+ChatCompletion chatCompletion = OJA.createChatCompletion("put$your#api%token§here", ChatCompletionModel.GPT_3_5_TURBO.getAIModel());
 ```
 Or... if you want to use a specify model, you can provide a string with the model identifier.
 ```java
-ChatCompletion chatCompletion = OJABuilder.createChatCompletion("put$your#api%token§here", "gpt-3.5-turbo-1106");
+ChatCompletion chatCompletion = OJA.createChatCompletion("put$your#api%token§here", "gpt-3.5-turbo-1106");
 ```
 
 #### Advanced (API Token, Model and Configuration)
@@ -40,7 +40,7 @@ ChatCompletionConfiguration config = new ChatCompletionConfiguration();
 config.setMaxTokens(1000);
 config.setServiceTier("default");
 
-ChatCompletion chatCompletion = OJABuilder.createChatCompletion("put$your#api%token§here", ChatCompletionModel.GPT_3_5_TURBO.getAIModel(), config);
+ChatCompletion chatCompletion = OJA.createChatCompletion("put$your#api%token§here", ChatCompletionModel.GPT_3_5_TURBO.getAIModel(), config);
 ```
 
 ---
