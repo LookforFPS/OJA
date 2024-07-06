@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import me.lookforfps.oja.chatcompletion.model.natives.message.Message;
+import me.lookforfps.oja.chatcompletion.model.natives.tools.Tool;
 import me.lookforfps.oja.model.RequestDto;
 
 import java.util.HashMap;
@@ -29,8 +30,8 @@ public class ChatCompletionRequestDto extends RequestDto {
     private Object stream_options;
     private Float temperature;
     private Float top_p;
-    private List<Object> tools;
-    private Object tool_choice;
+    private List<Tool> tools;
+    private String tool_choice;
     private Boolean parallel_tool_calls;
     private String user;
 }
