@@ -7,7 +7,7 @@
     <groupId>me.lookforfps.oja</groupId>
     <artifactId>OJA</artifactId>
     <description>OpenAI Java API</description>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
