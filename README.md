@@ -90,6 +90,67 @@ chatCompletion.addImageMessage("system", "https://here.is.my/image.png", "This i
 
 ---
 
+### Use Tools and Function
+> Tools and their functions enable the AI to utilize specific resources when needed.
+> For example, if someone asks for the weather, a designated tool can be called to provide the information, including location and unit, allowing you to respond appropriately.
+> <br>**When a tool gets called, no message will be generated.**
+
+> If you prefer, you can prepare several lists of tools and use the setter method to replace the tools in the configuration all at once.
+#### Add Tools to Configuration
+
+Tools must be added to the configuration. They are sent with each request, making them available whenever needed.
+```java
+configuration.addTool(new Tool(
+                ToolType.FUNCTION, // type of tool
+                new Function(
+                        "get_current_weather", // name of function
+                        "Get the current weather in a given location", // description of function
+                        new Parameters(
+                                ParameterType.OBJECT, // type of parameter
+                                new String[]{"location"}, // required properties
+                                Property.create(
+                                        "location", // name of property
+                                        PropertyType.STRING, // type of property
+                                        "The city and state, e.g. San Francisco, CA" // description of property
+                                        ),
+                                Property.create(
+                                        "unit", // name of property
+                                        PropertyType.STRING, // type of property
+                                        new String[] {"celsius", "fahrenheit"} // enum values for property
+                                )
+                        )
+                )
+        ));
+```
+
+#### Remove Tools from Configuration
+
+Tools can also be removed from the configuration by object reference.
+```java
+configuration.removeTool(tool);
+```
+Or... by the index number.
+```java
+configuration.removeTool(3);
+```
+
+#### Set ToolChoice in Configuration
+> The tool choice setting determines which tools the AI can call:
+> - `none` The model will not call any tools and will generate a message instead.
+> - `auto` The model can choose between generating a message or calling one or more tools.
+> - `required` The model must call one or more tools.
+
+To set the tool choice, you can use the ToolChoice enum.
+```java
+configuration.setToolChoice(ToolChoice.REQUIRED.getIdentifier());
+```
+Or... specify a custom tool choice in JSON format.
+```java
+configuration.setToolChoice("{\"type\": \"function\", \"function\": {\"name\": \"get_current_weather\"}}");
+```
+
+---
+
 ### Send Synchronous Request
 
 > All `addMessage` methods of the `ChatCompletion` class are designed to return the ChatCompletion object, allowing you to send a request directly with the returned value.
