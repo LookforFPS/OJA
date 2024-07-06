@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum PropertyType {
-    STRING("string");
+    STRING("string"),
+    INTEGER("integer");
 
     private String identifier;
 
