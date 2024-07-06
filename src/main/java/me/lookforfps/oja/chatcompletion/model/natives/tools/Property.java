@@ -7,6 +7,7 @@ import me.lookforfps.oja.chatcompletion.model.natives.tools.types.PropertyType;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -28,5 +29,15 @@ public class Property {
     }
     public Property(PropertyType type, String description) {
         this(type, description, null);
+    }
+
+    public static Map.Entry<String, Property> create(String name, PropertyType type, String description, String[] enumValues) {
+        return Map.entry(name, new Property(type, description, enumValues));
+    }
+    public static Map.Entry<String, Property> create(String name, PropertyType type, String[] enumValues) {
+        return Map.entry(name, new Property(type, null, enumValues));
+    }
+    public static Map.Entry<String, Property> create(String name, PropertyType type, String description) {
+        return Map.entry(name, new Property(type, description, null));
     }
 }
