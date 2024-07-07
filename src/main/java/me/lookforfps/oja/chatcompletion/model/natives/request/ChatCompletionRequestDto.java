@@ -2,6 +2,7 @@ package me.lookforfps.oja.chatcompletion.model.natives.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import me.lookforfps.oja.chatcompletion.model.natives.message.Message;
 import me.lookforfps.oja.chatcompletion.model.natives.tools.Tool;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChatCompletionRequestDto extends RequestDto {

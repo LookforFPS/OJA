@@ -2,12 +2,14 @@ package me.lookforfps.oja.chatcompletion.model.natives.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import me.lookforfps.oja.model.ResponseDto;
 
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChatCompletionResponseDto extends ResponseDto {
