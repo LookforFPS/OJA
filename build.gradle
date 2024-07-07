@@ -1,0 +1,82 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+project.group = 'me.lookforfps.oja'
+project.description = "OpenAI Java API"
+project.version = new Version("0", "1", "2")
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly libs.org.projectlombok.lombok
+    annotationProcessor libs.org.projectlombok.lombok
+    testCompileOnly libs.org.projectlombok.lombok
+    testAnnotationProcessor libs.org.projectlombok.lombok
+
+    api libs.com.fasterxml.jackson.core.jackson.databind
+    api libs.org.slf4j.slf4j.api
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from(components.java)
+
+            pom {
+                name = project.name
+                description = 'OpenAI Java API'
+                url = "https://github.com/LookforFPS/OJA"
+
+                licenses {
+                    license {
+                        name = 'The MIT License'
+                        url = 'http://opensource.org/licenses/MIT'
+                        distribution = 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = "lookforfps"
+                        name = "LookforFPS"
+                        email = "me@lookforfps.dev"
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git://github.com/LookforFPS/OJA'
+                    developerConnection = 'scm:git:ssh:git@github.com:LookforFPS/OJA'
+                    url = "https://github.com/LookforFPS/OJA"
+                }
+            }
+        }
+    }
+}
+
+
+class Version {
+    String major
+    String minor
+    String revision
+    String classifier
+
+    Version(String major, String minor, String revision, String classifier = null) {
+        this.major = major
+        this.minor = minor
+        this.revision = revision
+        this.classifier = classifier
+    }
+
+    String toString() {
+        return "${major}.${minor}.${revision}${classifier ? '-' + classifier : ''}"
+    }
+}

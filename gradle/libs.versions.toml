@@ -1,0 +1,10 @@
+
+[versions]
+com-fasterxml-jackson-core-jackson-databind = "2.17.0"
+org-projectlombok-lombok = "1.18.32"
+org-slf4j-slf4j-api = "2.0.13"
+
+[libraries]
+com-fasterxml-jackson-core-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "com-fasterxml-jackson-core-jackson-databind" }
+org-projectlombok-lombok = { module = "org.projectlombok:lombok", version.ref = "org-projectlombok-lombok" }
+org-slf4j-slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "org-slf4j-slf4j-api" }
