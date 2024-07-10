@@ -2,6 +2,7 @@ package me.lookforfps.oja.chatcompletion.model.natives.config;
 
 import lombok.Data;
 import me.lookforfps.oja.aimodel.AIModel;
+import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseType;
 import me.lookforfps.oja.chatcompletion.model.natives.tools.Tool;
 
 import java.util.ArrayList;
@@ -99,6 +100,13 @@ public class ChatCompletionConfiguration {
      * Options for streaming response. Only set this when you set <code>stream: true</code>.
      */
     private Boolean includeUsageToStream;
+    /**
+     * <b>Description: </b>
+     * An object specifying the format that the model must output. Compatible with <b>GPT-4 Turbo</b> and all <b>GPT-3.5 Turbo</b> models newer than <code>gpt-3.5-turbo-1106</code>.
+     * <br><br>
+     * Setting to <code>{ "type": "json_object" }</code> enables JSON mode, which guarantees the message the model generates is valid JSON.
+     */
+    private ResponseType responseType;
     /**
      * What sampling temperature to use, between 0 and 2.
      * Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.<br>

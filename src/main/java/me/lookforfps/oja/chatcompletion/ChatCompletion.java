@@ -9,6 +9,7 @@ import me.lookforfps.oja.chatcompletion.model.natives.config.ChatCompletionConfi
 import me.lookforfps.oja.chatcompletion.model.natives.message.MessageRole;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ChatCompletionRequestDto;
 import me.lookforfps.oja.chatcompletion.model.natives.content.ContentList;
+import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseFormat;
 import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponse;
 import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponseDto;
 import me.lookforfps.oja.chatcompletion.model.natives.message.Message;
@@ -123,6 +124,9 @@ public class ChatCompletion {
         requestDto.setMax_tokens(config.getMaxTokens());
         requestDto.setN(config.getChoices());
         requestDto.setPresence_penalty(config.getPresencePenalty());
+        if(config.getResponseType() != null) {
+            requestDto.setResponse_format(new ResponseFormat(config.getResponseType().getIdentifier()));
+        }
         requestDto.setSeed(config.getSeed());
         requestDto.setService_tier(config.getServiceTier());
         requestDto.setStop(config.getStop());

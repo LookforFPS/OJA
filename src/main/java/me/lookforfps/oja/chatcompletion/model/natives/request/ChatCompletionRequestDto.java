@@ -26,6 +26,7 @@ public class ChatCompletionRequestDto extends RequestDto {
     private Integer max_tokens;
     private Integer n;
     private Float presence_penalty;
+    private ResponseFormat response_format;
     private Integer seed;
     private String service_tier;
     private List<String> stop;
