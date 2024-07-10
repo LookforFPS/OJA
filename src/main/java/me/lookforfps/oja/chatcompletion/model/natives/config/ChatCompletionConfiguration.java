@@ -97,7 +97,9 @@ public class ChatCompletionConfiguration {
     private Boolean stream;
     /**
      * <b>Description: </b>
-     * Options for streaming response. Only set this when you set <code>stream: true</code>.
+     * If set, an additional chunk will be streamed before the <code>data: [DONE]</code> message.
+     * The <code>usage</code> field on this chunk shows the token usage statistics for the entire request, and the <code>choices</code> field will always be an empty array.
+     * All other chunks will also include a <code>usage</code> field, but with a null value.
      */
     private Boolean includeUsageToStream;
     /**
