@@ -56,10 +56,10 @@ public class ChatCompletionResponse {
     private String serviceTier;
 
     public Choice getFirstChoice() {
-        return choices.get(0);
+        return choices.getFirst();
     }
 
     public TextContent getFirstTextContent() {
-        return choices.get(0).getFirstTextContent();
+        return choices.getFirst().getFirstTextContent();
     }
 }

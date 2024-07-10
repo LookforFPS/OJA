@@ -23,7 +23,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -44,7 +45,7 @@ public class ChatCompletion {
         this.mapper = new Mapper();
     }
 
-    public ChatCompletionResponse sendRequest() throws IOException {
+    public ChatCompletionResponse sendRequest() throws IOException, URISyntaxException {
         config.setStream(false);
 
         byte[] request = buildRequest();
@@ -66,11 +67,11 @@ public class ChatCompletion {
         return response;
     }
 
-    public Stream sendStreamRequest() throws IOException {
+    public Stream sendStreamRequest() throws IOException, URISyntaxException {
         return sendStreamRequest(null);
     }
 
-    public Stream sendStreamRequest(StreamListener listener) throws IOException {
+    public Stream sendStreamRequest(StreamListener listener) throws IOException, URISyntaxException {
         config.setStream(true);
 
         StreamContainer streamContainer = new StreamContainer();
@@ -98,7 +99,7 @@ public class ChatCompletion {
                 if(config.getAutoAddAIResponseToContext()) {
                     log.warn("Automatically adding AI responses to context is currently not available for streaming!");
                 }
-            } catch(IOException ex) {
+            } catch(IOException | URISyntaxException ex) {
                 throw new RuntimeException(ex);
             }
         });
@@ -141,8 +142,8 @@ public class ChatCompletion {
         return mapper.requestDtoToBytes(requestDto);
     }
 
-    private HttpURLConnection buildConnection() throws IOException {
-        HttpURLConnection con = (HttpURLConnection) new URL(config.getApiUrl()).openConnection();
+    private HttpURLConnection buildConnection() throws IOException, URISyntaxException {
+        HttpURLConnection con = (HttpURLConnection) new URI(config.getApiUrl()).toURL().openConnection();
 
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/json");

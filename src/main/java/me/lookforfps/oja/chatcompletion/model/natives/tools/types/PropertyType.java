@@ -5,7 +5,9 @@ import lombok.Getter;
 @Getter
 public enum PropertyType {
     STRING("string"),
-    INTEGER("integer");
+    INTEGER("integer"),
+    NUMBER("number"),
+    BOOLEAN("boolean");
 
     private String identifier;
 
