@@ -3,6 +3,8 @@ package me.lookforfps.oja.chatcompletion;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import me.lookforfps.oja.chatcompletion.event.*;
+import me.lookforfps.oja.chatcompletion.hook.StreamEmitter;
 import me.lookforfps.oja.chatcompletion.model.natives.config.ChatCompletionConfiguration;
 import me.lookforfps.oja.chatcompletion.model.natives.message.MessageRole;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ChatCompletionRequestDto;
@@ -10,11 +12,12 @@ import me.lookforfps.oja.chatcompletion.model.natives.content.ContentList;
 import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponse;
 import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponseDto;
 import me.lookforfps.oja.chatcompletion.model.natives.message.Message;
+import me.lookforfps.oja.chatcompletion.hook.StreamContainer;
+import me.lookforfps.oja.chatcompletion.model.streaming.StreamOptions;
 import me.lookforfps.oja.chatcompletion.model.streaming.chunk.Chunk;
 import me.lookforfps.oja.chatcompletion.model.streaming.Stream;
 import me.lookforfps.oja.chatcompletion.hook.StreamListener;
 import me.lookforfps.oja.chatcompletion.mapping.Mapper;
-import me.lookforfps.oja.chatcompletion.event.ChunkStreamedEvent;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -70,7 +73,8 @@ public class ChatCompletion {
     public Stream sendStreamRequest(StreamListener listener) throws IOException {
         config.setStream(true);
 
-        Stream stream = new Stream();
+        StreamContainer streamContainer = new StreamContainer();
+        Stream stream = new Stream(streamContainer);
         if (listener != null) {
             stream.addStreamListener(listener);
         }
@@ -84,7 +88,7 @@ public class ChatCompletion {
 
                 Scanner scanner = new Scanner(con.getInputStream());
                 while (scanner.hasNextLine()) {
-                    if(classifyChunk(stream, scanner.nextLine())) {
+                    if(classifyChunk(streamContainer, scanner.nextLine())) {
                         break;
                     }
                 }
@@ -122,7 +126,9 @@ public class ChatCompletion {
         requestDto.setService_tier(config.getServiceTier());
         requestDto.setStop(config.getStop());
         requestDto.setStream(config.getStream());
-        requestDto.setStream_options(config.getStreamOptions());
+        if(config.getIncludeUsageToStream() != null) {
+            requestDto.setStream_options(new StreamOptions(config.getIncludeUsageToStream()));
+        }
         requestDto.setTemperature(config.getTemperature());
         requestDto.setTop_p(config.getTopP());
         requestDto.setTools(config.getTools());
@@ -166,30 +172,42 @@ public class ChatCompletion {
         return response;
     }
 
-    private boolean classifyChunk(Stream stream, String rawChunk) throws IOException {
+    private boolean classifyChunk(StreamContainer streamContainer, String rawChunk) throws IOException {
         String output = rawChunk.replace("data: ", "");
         log.debug("chunkResponse: "+output);
 
         if(output.equalsIgnoreCase("[DONE]")) {
-            stream.emitStreamStopped();
+            StreamStoppedEvent streamStoppedEvent = new StreamStoppedEvent(streamContainer.getChunkResult());
+            StreamEmitter.emitStreamStopped(streamStoppedEvent, streamContainer.getListeners());
             log.debug("stream stopped");
             return true;
-        } else if(output.equalsIgnoreCase("")) {
-            log.debug("empty chunk skipped");
-        } else if(rawChunk.startsWith("data:")) {
+        } else if(output.startsWith("{")) {
             Chunk chunk = mapper.bytesToChunk(output.getBytes());
-            if(chunk.getChoices().get(0).getDelta().getContent() == null && chunk.getChoices().get(0).getDelta().getTool_calls() == null) {
-                log.debug("empty chunk skipped");
-            } else {
-                stream.updateChoices(chunk.getChoices());
-                ChunkStreamedEvent chunkStreamedEvent = new ChunkStreamedEvent(chunk);
-                stream.emitChunkStreamed(chunkStreamedEvent);
-                log.debug("chunk shared");
-            }
+            classifyChunkContent(streamContainer, chunk);
         } else {
-            log.error("Error during classifying chunk!");
+            log.debug("empty chunk skipped");
         }
         return false;
+    }
+
+    private void classifyChunkContent(StreamContainer streamContainer, Chunk chunk) {
+        streamContainer.updateChunkResult(chunk);
+        ChunkStreamedEvent chunkStreamedEvent = new ChunkStreamedEvent(chunk, streamContainer.getChunkResult());
+        StreamEmitter.emitChunkStreamed(chunkStreamedEvent, streamContainer.getListeners());
+
+        if(chunk.getUsage() != null) {
+            UsageStreamedEvent usageStreamedEvent = new UsageStreamedEvent(chunk, streamContainer.getChunkResult(), chunk.getUsage());
+            StreamEmitter.emitUsageStreamed(usageStreamedEvent, streamContainer.getListeners());
+        } else if(chunk.getChoices().getFirst().getFinish_reason() != null) {
+            StreamFinishedEvent streamFinishedEvent = new StreamFinishedEvent(chunk, streamContainer.getChunkResult(), chunk.getChoices().getFirst().getFinish_reason());
+            StreamEmitter.emitStreamFinished(streamFinishedEvent, streamContainer.getListeners());
+        } else if(chunk.getChoices().getFirst().getDelta().getTool_calls() != null) {
+            ToolCallStreamedEvent toolCallStreamedEvent = new ToolCallStreamedEvent(chunk, streamContainer.getChunkResult(), chunk.getChoices().getFirst().getDelta().getTool_calls());
+            StreamEmitter.emitToolCallStreamed(toolCallStreamedEvent, streamContainer.getListeners());
+        } else {
+            ContentStreamedEvent contentStreamedEvent = new ContentStreamedEvent(chunk, streamContainer.getChunkResult(), chunk.getChoices());
+            StreamEmitter.emitContentStreamed(contentStreamedEvent, streamContainer.getListeners());
+        }
     }
 
     public ChatCompletion addMessage(Message message) {

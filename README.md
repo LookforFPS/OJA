@@ -7,8 +7,6 @@ It aims to simplify the process for developers, enabling them to utilize OpenAI'
 **As this is a `PREVIEW` version, there may be bugs and other issues that could affect performance and functionality.**<br>
 This version only supports chat completion, allowing responses to be received either as a whole or streamed in chunks with already processed words.<br>
 <br>
-**The functionality to use functions and tools in chat completion is not implemented yet.**<br>
-<br>
 Future updates will introduce additional functionalities, including the implementation of features such as Image Generation and Audio Transcription.
 
 ## Get Started
@@ -175,33 +173,55 @@ Use the `sendStreamRequest` method to obtain a Stream object.
 Stream stream = chatCompletion.sendStreamRequest();
 ```
 
-#### Handle Stream Events
+#### Listen to Stream Events
 
-Just use the `addStreamListener` method to add a StreamListener to Stream.
+Just use the `addStreamListener` method to add a `StreamListenerAdapter` or a native `StreamListener` to the Stream.
 ```java
-stream.addStreamListener(new StreamListener() {
+stream.addStreamListener(new StreamListenerAdapter() {
+
     @Override
     public void onChunkStreamed(ChunkStreamedEvent event) {
-        // Handle chunk streamed event
+        // Triggered when a new chunk is streamed.
     }
 
     @Override
-    public void onStreamStopped() {
-        // Handle stream stopped event
+    public void onContentStreamed(ContentStreamedEvent event) {
+        // Triggered when a chunk containing content is streamed.
+    }
+
+    @Override
+    public void onUsageStreamed(UsageStreamedEvent event) {
+        // Triggered when a chunk with usage data is streamed.
+        // CAUTION: Usage data will be streamed after the StreamFinishedEvent has been emitted.
+    }
+
+    @Override
+    public void onToolCallStreamed(ToolCallStreamedEvent event) {
+        // Triggered when a chunk with toolCalls is streamed.
+    }
+
+    @Override
+    public void onStreamFinished(StreamFinishedEvent event) {
+        // Triggered when a chunk with the finishReason is streamed.
+    }
+
+    @Override
+    public void onStreamStopped(StreamStoppedEvent event) {
+        // Triggered when the stream is completely stopped.
     }
 });
 ```
 Or... you can add a StreamListener on `sendStreamRequest` method.
 ```java
-Stream stream = chatCompletion.sendStreamRequest(new StreamListener() {
+Stream stream = chatCompletion.sendStreamRequest(new StreamListenerAdapter() {
     @Override
-    public void onChunkStreamed(ChunkStreamedEvent event) {
-        // Handle chunk streamed event
+    public void onContentStreamed(ContentStreamedEvent event) {
+        // Triggered when a chunk containing content is streamed.
     }
 
     @Override
-    public void onStreamStopped() {
-        // Handle stream stopped event
+    public void onStreamStopped(StreamStoppedEvent event) {
+        // Triggered when the stream is completely stopped.
     }
 });
 ```

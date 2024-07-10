@@ -98,7 +98,7 @@ public class ChatCompletionConfiguration {
      * <b>Description: </b>
      * Options for streaming response. Only set this when you set <code>stream: true</code>.
      */
-    private Object streamOptions;
+    private Boolean includeUsageToStream;
     /**
      * What sampling temperature to use, between 0 and 2.
      * Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.<br>

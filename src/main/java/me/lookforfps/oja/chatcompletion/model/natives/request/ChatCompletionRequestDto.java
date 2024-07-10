@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import me.lookforfps.oja.chatcompletion.model.natives.message.Message;
 import me.lookforfps.oja.chatcompletion.model.natives.tools.Tool;
+import me.lookforfps.oja.chatcompletion.model.streaming.StreamOptions;
 import me.lookforfps.oja.model.RequestDto;
 
 import java.util.HashMap;
@@ -29,7 +30,7 @@ public class ChatCompletionRequestDto extends RequestDto {
     private String service_tier;
     private List<String> stop;
     private Boolean stream;
-    private Object stream_options;
+    private StreamOptions stream_options;
     private Float temperature;
     private Float top_p;
     private List<Tool> tools;

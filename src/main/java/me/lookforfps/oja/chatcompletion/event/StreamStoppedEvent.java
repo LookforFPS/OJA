@@ -8,7 +8,6 @@ import me.lookforfps.oja.chatcompletion.model.streaming.chunk.Chunk;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChunkStreamedEvent {
-    private Chunk chunk;
+public class StreamStoppedEvent {
     private Chunk chunkResult;
 }
