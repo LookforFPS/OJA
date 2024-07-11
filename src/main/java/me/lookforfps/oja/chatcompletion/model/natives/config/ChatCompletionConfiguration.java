@@ -25,8 +25,14 @@ public class ChatCompletionConfiguration {
      * <br>
      * <b>defaultValue: </b><code>true</code>
      */
-    private Boolean autoAddAIResponseToContext = true;
-    private Integer autoAddAIResponseChoiceIndex = 0;
+    private Boolean addAIResponseToContext = true;
+    /**
+     * <b>Description: </b>
+     * Specifies which choice of the AI response, should be automatically added to the context.
+     * <br>
+     * <b>defaultValue: </b><code>0</code>
+     */
+    private Integer aiResponseChoiceIndex = 0;
     /**
      * <b>Description: </b>
      * Number between -2.0 and 2.0.

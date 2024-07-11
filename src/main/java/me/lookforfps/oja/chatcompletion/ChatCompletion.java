@@ -61,8 +61,11 @@ public class ChatCompletion {
 
         ChatCompletionResponse response = buildResponse(output);
 
-        if(config.getAutoAddAIResponseToContext()) {
-            addMessage(response.getChoices().get(config.getAutoAddAIResponseChoiceIndex()).getMessage());
+        if(config.getAddAIResponseToContext()) {
+            Message aiMessage = new Message(
+                    MessageRole.SYSTEM,
+                    ContentList.addTextContent(response.getChoices().get(config.getAiResponseChoiceIndex()).getFirstTextContent().getText()));
+            addMessage(aiMessage);
         }
 
         return response;
@@ -97,8 +100,11 @@ public class ChatCompletion {
                 scanner.close();
                 con.disconnect();
 
-                if(config.getAutoAddAIResponseToContext()) {
-                    log.warn("Automatically adding AI responses to context is currently not available for streaming!");
+                if(config.getAddAIResponseToContext()) {
+                    Message aiMessage = new Message(
+                            MessageRole.SYSTEM,
+                            ContentList.addTextContent(streamContainer.getChunkResult().getChoices().get(config.getAiResponseChoiceIndex()).getDelta().getContent()));
+                    addMessage(aiMessage);
                 }
             } catch(IOException | URISyntaxException ex) {
                 throw new RuntimeException(ex);
