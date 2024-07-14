@@ -209,11 +209,11 @@ public class ChatCompletion {
         if(chunk.getUsage() != null) {
             UsageStreamedEvent usageStreamedEvent = new UsageStreamedEvent(chunk, streamContainer.getChunkResult(), chunk.getUsage());
             StreamEmitter.emitUsageStreamed(usageStreamedEvent, streamContainer.getListeners());
-        } else if(chunk.getChoices().getFirst().getFinish_reason() != null) {
-            StreamFinishedEvent streamFinishedEvent = new StreamFinishedEvent(chunk, streamContainer.getChunkResult(), chunk.getChoices().getFirst().getFinish_reason());
+        } else if(chunk.getChoices().get(0).getFinish_reason() != null) {
+            StreamFinishedEvent streamFinishedEvent = new StreamFinishedEvent(chunk, streamContainer.getChunkResult(), chunk.getChoices().get(0).getFinish_reason());
             StreamEmitter.emitStreamFinished(streamFinishedEvent, streamContainer.getListeners());
-        } else if(chunk.getChoices().getFirst().getDelta().getTool_calls() != null) {
-            ToolCallStreamedEvent toolCallStreamedEvent = new ToolCallStreamedEvent(chunk, streamContainer.getChunkResult(), chunk.getChoices().getFirst().getDelta().getTool_calls());
+        } else if(chunk.getChoices().get(0).getDelta().getTool_calls() != null) {
+            ToolCallStreamedEvent toolCallStreamedEvent = new ToolCallStreamedEvent(chunk, streamContainer.getChunkResult(), chunk.getChoices().get(0).getDelta().getTool_calls());
             StreamEmitter.emitToolCallStreamed(toolCallStreamedEvent, streamContainer.getListeners());
         } else {
             ContentStreamedEvent contentStreamedEvent = new ContentStreamedEvent(chunk, streamContainer.getChunkResult(), chunk.getChoices());

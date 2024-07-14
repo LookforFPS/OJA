@@ -3,6 +3,7 @@ package me.lookforfps.oja.chatcompletion.model.natives.content;
 import lombok.NoArgsConstructor;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 public class ContentList extends ArrayList<Content> {
@@ -12,7 +13,7 @@ public class ContentList extends ArrayList<Content> {
     }
 
     public ContentList(Content... content) {
-        this.addAll(Arrays.stream(content).toList());
+        this.addAll(Arrays.stream(content).collect(Collectors.toList()));
     }
 
     public static ContentList addTextContent(String text) {

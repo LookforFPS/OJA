@@ -3,11 +3,12 @@ package me.lookforfps.oja.chatcompletion.model.natives.tools;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.lookforfps.oja.chatcompletion.model.natives.tools.types.PropertyType;
 
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -21,7 +22,7 @@ public class Property {
         this.type = type;
         this.description = description;
         if(enumValues != null) {
-            this.enumValues = Arrays.stream(enumValues).toList();
+            this.enumValues = Arrays.stream(enumValues).collect(Collectors.toList());
         }
     }
     public Property(String type, String[] enumValues) {
@@ -32,12 +33,12 @@ public class Property {
     }
 
     public static Map.Entry<String, Property> create(String name, String type, String description, String[] enumValues) {
-        return Map.entry(name, new Property(type, description, enumValues));
+        return new AbstractMap.SimpleEntry<>(name, new Property(type, description, enumValues));
     }
     public static Map.Entry<String, Property> create(String name, String type, String[] enumValues) {
-        return Map.entry(name, new Property(type, null, enumValues));
+        return new AbstractMap.SimpleEntry<>(name, new Property(type, null, enumValues));
     }
     public static Map.Entry<String, Property> create(String name, String type, String description) {
-        return Map.entry(name, new Property(type, description, null));
+        return new AbstractMap.SimpleEntry<>(name, new Property(type, description, null));
     }
 }
