@@ -1,7 +1,7 @@
 package me.lookforfps.oja.chatcompletion.model.natives.config;
 
 import lombok.Data;
-import me.lookforfps.oja.aimodel.AIModel;
+import me.lookforfps.oja.aimodel.Model;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseType;
 import me.lookforfps.oja.chatcompletion.model.natives.tools.Tool;
 
@@ -18,7 +18,7 @@ public class ChatCompletionConfiguration {
      * <b>Description: </b>
      * ID of the model to use.
      */
-    private AIModel AIModel;
+    private Model Model;
     /**
      * <b>Description: </b>
      * Specifies if the response, from the AI, should be automatically added to the context.

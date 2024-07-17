@@ -3,7 +3,6 @@ package me.lookforfps.oja.chatcompletion.model.natives.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.lookforfps.oja.chatcompletion.model.natives.content.TextContent;
 
 import java.util.List;
 
@@ -57,9 +56,5 @@ public class ChatCompletionResponse {
 
     public Choice getFirstChoice() {
         return choices.get(0);
-    }
-
-    public TextContent getFirstTextContent() {
-        return choices.get(0).getFirstTextContent();
     }
 }

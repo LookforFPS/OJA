@@ -8,21 +8,21 @@ public enum ModerationModel {
      * <b>Description: </b>
      * Currently points to text-moderation-007.
      */
-    TEXT_MODERATION_LATEST(new AIModel("text-moderation-latest")),
+    TEXT_MODERATION_LATEST(new Model("text-moderation-latest")),
     /**
      * <b>Description: </b>
      * Currently points to text-moderation-007.
      */
-    TEXT_MODERATION_STABLE(new AIModel("text-moderation-stable")),
+    TEXT_MODERATION_STABLE(new Model("text-moderation-stable")),
     /**
      * <b>Description: </b>
      * Most capable moderation model across all categories.
      */
-    TEXT_MODERATION_007(new AIModel("text-moderation-007"));
+    TEXT_MODERATION_007(new Model("text-moderation-007"));
 
-    private AIModel AIModel;
+    private Model Model;
 
-    ModerationModel(AIModel AIModel) {
-        this.AIModel = AIModel;
+    ModerationModel(Model Model) {
+        this.Model = Model;
     }
 }

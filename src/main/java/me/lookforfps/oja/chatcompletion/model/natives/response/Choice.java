@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import me.lookforfps.oja.chatcompletion.model.natives.message.Message;
-import me.lookforfps.oja.chatcompletion.model.natives.content.TextContent;
 import me.lookforfps.oja.chatcompletion.model.natives.logprobs.LogProbs;
 
 @Data
@@ -33,8 +32,4 @@ public class Choice {
      * This will be <code>stop</code> if the model hit a natural stop point or a provided stop sequence, <code>length</code> if the maximum number of tokens specified in the request was reached, <code>content_filter</code> if content was omitted due to a flag from our content filters, <code>tool_calls</code> if the model called a tool, or <code>function_call</code> (deprecated) if the model called a function.
      */
     private String finish_reason;
-
-    public TextContent getFirstTextContent() {
-        return this.message.getContent().getFirstTextContent();
-    }
 }

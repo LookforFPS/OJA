@@ -2,19 +2,16 @@ package me.lookforfps.oja.chatcompletion.mapping;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import me.lookforfps.oja.chatcompletion.model.natives.message.Message;
-import me.lookforfps.oja.chatcompletion.model.natives.content.ContentList;
+import me.lookforfps.oja.chatcompletion.model.natives.message.*;
 import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponseDto;
 import me.lookforfps.oja.chatcompletion.model.natives.response.Choice;
 import me.lookforfps.oja.chatcompletion.model.natives.logprobs.LogProbs;
 import me.lookforfps.oja.chatcompletion.model.streaming.chunk.Chunk;
 import me.lookforfps.oja.chatcompletion.model.streaming.chunk.ChunkDto;
-import me.lookforfps.oja.chatcompletion.model.natives.tools.ToolCall;
 import me.lookforfps.oja.model.RequestDto;
 import me.lookforfps.oja.model.ResponseDto;
 
@@ -24,8 +21,8 @@ import java.util.List;
 
 public class Mapper {
 
-    private ObjectMapper objectMapper;
-    private ObjectWriter objectWriter;
+    private final ObjectMapper objectMapper;
+    private final ObjectWriter objectWriter;
 
     public Mapper() {
         this.objectMapper = new ObjectMapper();
@@ -97,16 +94,18 @@ public class Mapper {
     }
 
     public Message jsonNodeToMessage(JsonNode messageJsonNode) throws JsonProcessingException {
-        Message message = new Message();
-        message.setRole(messageJsonNode.get("role").asText());
-        message.setContent(ContentList.addTextContent(messageJsonNode.get("content").asText()));
-        if(messageJsonNode.get("name") != null) {
-            message.setName(messageJsonNode.get("name").asText());
+        MessageRole role = MessageRole.fromIdentifier(messageJsonNode.get("role").asText());
+        assert role != null;
+        if(role.equals(MessageRole.SYSTEM)) {
+            return objectMapper.treeToValue(messageJsonNode, SystemMessage.class);
+        } else if(role.equals(MessageRole.USER)) {
+            return objectMapper.treeToValue(messageJsonNode, UserMessage.class);
+        } else if(role.equals(MessageRole.ASSISTANT)) {
+            return objectMapper.treeToValue(messageJsonNode, AssistantMessage.class);
+        } else if(role.equals(MessageRole.TOOL)) {
+            return objectMapper.treeToValue(messageJsonNode, ToolMessage.class);
         }
-        if(messageJsonNode.get("tool_calls") != null) {
-            message.setTool_calls(objectMapper.treeToValue(messageJsonNode.get("tool_calls"), new TypeReference<List<ToolCall>>() {}));
-        }
-        return message;
+        return null;
     }
 
     public Chunk bytesToChunk(byte[] chunkBytes) throws IOException {

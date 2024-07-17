@@ -1,4 +1,4 @@
-package me.lookforfps.oja.chatcompletion.model.natives.content;
+package me.lookforfps.oja.chatcompletion.model.natives.message.content;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class TextContent extends Content {
+public class TextContent extends ContentEntry {
 
     private String type = "text";
     private String text;

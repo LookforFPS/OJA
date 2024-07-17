@@ -6,15 +6,15 @@ import lombok.extern.slf4j.Slf4j;
 import me.lookforfps.oja.chatcompletion.event.*;
 import me.lookforfps.oja.chatcompletion.hook.StreamEmitter;
 import me.lookforfps.oja.chatcompletion.model.natives.config.ChatCompletionConfiguration;
-import me.lookforfps.oja.chatcompletion.model.natives.message.MessageRole;
+import me.lookforfps.oja.chatcompletion.model.natives.message.AssistantMessage;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ChatCompletionRequestDto;
-import me.lookforfps.oja.chatcompletion.model.natives.content.ContentList;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseFormat;
 import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponse;
 import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponseDto;
 import me.lookforfps.oja.chatcompletion.model.natives.message.Message;
 import me.lookforfps.oja.chatcompletion.hook.StreamContainer;
 import me.lookforfps.oja.chatcompletion.model.streaming.StreamOptions;
+import me.lookforfps.oja.chatcompletion.model.streaming.choice.Choice;
 import me.lookforfps.oja.chatcompletion.model.streaming.chunk.Chunk;
 import me.lookforfps.oja.chatcompletion.model.streaming.Stream;
 import me.lookforfps.oja.chatcompletion.hook.StreamListener;
@@ -38,7 +38,7 @@ public class ChatCompletion {
     private ChatCompletionConfiguration config;
     @Getter
     @Setter
-    private List<Message> messages = new ArrayList<>();
+    private List<Message> context = new ArrayList<>();
     private final Mapper mapper;
 
     public ChatCompletion(ChatCompletionConfiguration configuration) {
@@ -62,10 +62,10 @@ public class ChatCompletion {
         ChatCompletionResponse response = buildResponse(output);
 
         if(config.getAddAIResponseToContext()) {
-            Message aiMessage = new Message(
-                    MessageRole.SYSTEM,
-                    ContentList.addTextContent(response.getChoices().get(config.getAiResponseChoiceIndex()).getFirstTextContent().getText()));
-            addMessage(aiMessage);
+            AssistantMessage message = response.getChoices().get(config.getAiResponseChoiceIndex()).getMessage().asAssistantMessage();
+            if(message != null) {
+                addMessage(new AssistantMessage(message.getContent(), message.getTool_calls()));
+            }
         }
 
         return response;
@@ -101,11 +101,15 @@ public class ChatCompletion {
                 con.disconnect();
 
                 if(config.getAddAIResponseToContext()) {
-                    Message aiMessage = new Message(
-                            MessageRole.SYSTEM,
-                            ContentList.addTextContent(streamContainer.getChunkResult().getChoices().get(config.getAiResponseChoiceIndex()).getDelta().getContent()));
-                    addMessage(aiMessage);
+                    Choice choice = streamContainer.getChunkResult().getChoices().get(config.getAiResponseChoiceIndex());
+                    if(choice != null && choice.getDelta() != null) {
+                        addMessage(new AssistantMessage(choice.getDelta().getContent(), choice.getDelta().getTool_calls()));
+                    }
                 }
+
+                StreamStoppedEvent streamStoppedEvent = new StreamStoppedEvent(streamContainer.getChunkResult());
+                StreamEmitter.emitStreamStopped(streamStoppedEvent, streamContainer.getListeners());
+                log.debug("stream stopped");
             } catch(IOException | URISyntaxException ex) {
                 throw new RuntimeException(ex);
             }
@@ -120,8 +124,8 @@ public class ChatCompletion {
     private byte[] buildRequest() throws IOException {
         ChatCompletionRequestDto requestDto = new ChatCompletionRequestDto();
 
-        requestDto.setModel(config.getAIModel().getIdentifier());
-        requestDto.setMessages(messages);
+        requestDto.setModel(config.getModel().getIdentifier());
+        requestDto.setMessages(context);
 
         requestDto.setFrequency_penalty(config.getFrequencyPenalty());
         requestDto.setLogit_bias(config.getLogitBias());
@@ -188,9 +192,9 @@ public class ChatCompletion {
         log.debug("chunkResponse: "+output);
 
         if(output.equalsIgnoreCase("[DONE]")) {
-            StreamStoppedEvent streamStoppedEvent = new StreamStoppedEvent(streamContainer.getChunkResult());
-            StreamEmitter.emitStreamStopped(streamStoppedEvent, streamContainer.getListeners());
-            log.debug("stream stopped");
+            StreamFinishedEvent streamFinishedEvent = new StreamFinishedEvent(streamContainer.getChunkResult(), streamContainer.getChunkResult().getChoices().get(0).getFinish_reason());
+            StreamEmitter.emitStreamFinished(streamFinishedEvent, streamContainer.getListeners());
+            log.debug("stream finished");
             return true;
         } else if(output.startsWith("{")) {
             Chunk chunk = mapper.bytesToChunk(output.getBytes());
@@ -209,48 +213,25 @@ public class ChatCompletion {
         if(chunk.getUsage() != null) {
             UsageStreamedEvent usageStreamedEvent = new UsageStreamedEvent(chunk, streamContainer.getChunkResult(), chunk.getUsage());
             StreamEmitter.emitUsageStreamed(usageStreamedEvent, streamContainer.getListeners());
-        } else if(chunk.getChoices().get(0).getFinish_reason() != null) {
-            StreamFinishedEvent streamFinishedEvent = new StreamFinishedEvent(chunk, streamContainer.getChunkResult(), chunk.getChoices().get(0).getFinish_reason());
-            StreamEmitter.emitStreamFinished(streamFinishedEvent, streamContainer.getListeners());
         } else if(chunk.getChoices().get(0).getDelta().getTool_calls() != null) {
             ToolCallStreamedEvent toolCallStreamedEvent = new ToolCallStreamedEvent(chunk, streamContainer.getChunkResult(), chunk.getChoices().get(0).getDelta().getTool_calls());
             StreamEmitter.emitToolCallStreamed(toolCallStreamedEvent, streamContainer.getListeners());
-        } else {
+        } else if(chunk.getChoices().get(0).getDelta().getContent() != null) {
             ContentStreamedEvent contentStreamedEvent = new ContentStreamedEvent(chunk, streamContainer.getChunkResult(), chunk.getChoices());
             StreamEmitter.emitContentStreamed(contentStreamedEvent, streamContainer.getListeners());
         }
     }
 
     public ChatCompletion addMessage(Message message) {
-        messages.add(message);
-        return this;
-    }
-    public ChatCompletion addImageMessage(MessageRole role, String imageUrl, String additionText) {
-        addMessage(new Message(role, ContentList.addImageWithTextContent(imageUrl, additionText)));
-        return this;
-    }
-    public ChatCompletion addImageMessage(MessageRole role, String imageUrl) {
-        addMessage(new Message(role, ContentList.addImageContent(imageUrl)));
-        return this;
-    }
-    public ChatCompletion addImageMessage(String imageUrl) {
-        addImageMessage(MessageRole.USER, imageUrl);
-        return this;
-    }
-    public ChatCompletion addTextMessage(MessageRole role, String text) {
-        addMessage(new Message(role, ContentList.addTextContent(text)));
-        return this;
-    }
-    public ChatCompletion addTextMessage(String text) {
-        addTextMessage(MessageRole.USER, text);
+        context.add(message);
         return this;
     }
     public ChatCompletion removeMessage(int index) {
-        messages.remove(index);
+        context.remove(index);
         return this;
     }
     public ChatCompletion removeMessage(Message message) {
-        messages.remove(message);
+        context.remove(message);
         return this;
     }
 }

@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum MessageRole {
     USER("user"),
-    ASSISTENT("assistent"),
+    ASSISTANT("assistant"),
     TOOL("tool"),
     SYSTEM("system");
 
@@ -13,5 +13,14 @@ public enum MessageRole {
 
     MessageRole(String identifier) {
         this.identifier = identifier;
+    }
+
+    public static MessageRole fromIdentifier(String identifier) {
+        for (MessageRole role : MessageRole.values()) {
+            if (role.identifier.equals(identifier)) {
+                return role;
+            }
+        }
+        return null;
     }
 }

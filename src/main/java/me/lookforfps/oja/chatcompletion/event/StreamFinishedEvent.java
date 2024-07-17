@@ -1,18 +1,17 @@
 package me.lookforfps.oja.chatcompletion.event;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import me.lookforfps.oja.chatcompletion.model.streaming.chunk.Chunk;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class StreamFinishedEvent extends ChunkStreamedEvent {
+public class StreamFinishedEvent {
+    private Chunk chunkResult;
     private String finishReason;
 
-    public StreamFinishedEvent(Chunk streamedChunk, Chunk chunkResult, String finishReason) {
-        super(streamedChunk, chunkResult);
+    public StreamFinishedEvent(Chunk chunkResult, String finishReason) {
+        this.chunkResult = chunkResult;
         this.finishReason = finishReason;
     }
 }
