@@ -3,6 +3,7 @@ package me.lookforfps.oja.chatcompletion;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import me.lookforfps.oja.aimodel.Model;
 import me.lookforfps.oja.chatcompletion.event.*;
 import me.lookforfps.oja.chatcompletion.hook.StreamEmitter;
 import me.lookforfps.oja.chatcompletion.model.natives.config.ChatCompletionConfiguration;
@@ -31,7 +32,7 @@ import java.util.List;
 import java.util.Scanner;
 
 @Slf4j
-public class ChatCompletion {
+public class ChatCompletionService {
 
     @Getter
     @Setter
@@ -41,9 +42,35 @@ public class ChatCompletion {
     private List<Message> context = new ArrayList<>();
     private final Mapper mapper;
 
-    public ChatCompletion(ChatCompletionConfiguration configuration) {
+    private ChatCompletionService(ChatCompletionConfiguration configuration) {
         this.config = configuration;
         this.mapper = new Mapper();
+    }
+
+    public static ChatCompletionService build(String apiToken, Model Model, ChatCompletionConfiguration configuration) {
+        if(configuration==null) {
+            configuration = new ChatCompletionConfiguration();
+        }
+        configuration.setApiToken(apiToken);
+        configuration.setModel(Model);
+        if(configuration.getApiToken()!=null && configuration.getModel()!=null) {
+            return new ChatCompletionService(configuration);
+        } else {
+            log.error("The API Token or/and Model is not set!");
+            return null;
+        }
+    }
+    public static ChatCompletionService build(ChatCompletionConfiguration configuration) {
+        return build(configuration.getApiToken(), configuration.getModel(), configuration);
+    }
+    public static ChatCompletionService build(String apiToken, String modelIdentifier, ChatCompletionConfiguration configuration) {
+        return build(apiToken, new Model(modelIdentifier), configuration);
+    }
+    public static ChatCompletionService build(String apiToken, Model Model) {
+        return build(apiToken, Model, null);
+    }
+    public static ChatCompletionService build(String apiToken, String modelIdentifier) {
+        return build(apiToken, new Model(modelIdentifier));
     }
 
     public ChatCompletionResponse sendRequest() throws IOException, URISyntaxException {
@@ -222,15 +249,15 @@ public class ChatCompletion {
         }
     }
 
-    public ChatCompletion addMessage(Message message) {
+    public ChatCompletionService addMessage(Message message) {
         context.add(message);
         return this;
     }
-    public ChatCompletion removeMessage(int index) {
+    public ChatCompletionService removeMessage(int index) {
         context.remove(index);
         return this;
     }
-    public ChatCompletion removeMessage(Message message) {
+    public ChatCompletionService removeMessage(Message message) {
         context.remove(message);
         return this;
     }

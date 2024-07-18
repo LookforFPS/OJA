@@ -54,7 +54,10 @@ public class ChatCompletionResponse {
      */
     private String serviceTier;
 
-    public Choice getFirstChoice() {
-        return choices.get(0);
+    public String getTextContent(Integer choiceIndex) {
+        return choices.get(choiceIndex).getMessage().asAssistantMessage().getContent();
+    }
+    public String getTextContent() {
+        return getTextContent(0);
     }
 }

@@ -32,4 +32,8 @@ public class Choice {
      * This will be <code>stop</code> if the model hit a natural stop point or a provided stop sequence, <code>length</code> if the maximum number of tokens specified in the request was reached, <code>content_filter</code> if content was omitted due to a flag from our content filters, <code>tool_calls</code> if the model called a tool, or <code>function_call</code> (deprecated) if the model called a function.
      */
     private String finish_reason;
+
+    public String getTextContent() {
+        return message.asAssistantMessage().getContent();
+    }
 }

@@ -17,4 +17,11 @@ public class Chunk {
     private String systemFingerprint;
     private String object;
     private Usage usage;
+
+    public String getTextContent(Integer choiceIndex) {
+        return choices.get(choiceIndex).getDelta().getContent();
+    }
+    public String getTextContent() {
+        return getTextContent(0);
+    }
 }
