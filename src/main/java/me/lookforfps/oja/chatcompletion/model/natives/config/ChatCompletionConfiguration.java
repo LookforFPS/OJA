@@ -1,8 +1,8 @@
 package me.lookforfps.oja.chatcompletion.model.natives.config;
 
 import lombok.Data;
-import me.lookforfps.oja.aimodel.Model;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseType;
+import me.lookforfps.oja.chatcompletion.model.natives.request.ServiceTier;
 import me.lookforfps.oja.chatcompletion.model.natives.tools.Tool;
 
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class ChatCompletionConfiguration {
      * <b>Description: </b>
      * ID of the model to use.
      */
-    private Model Model;
+    private String model;
     /**
      * <b>Description: </b>
      * Specifies if the response, from the AI, should be automatically added to the context.
@@ -89,7 +89,7 @@ public class ChatCompletionConfiguration {
      * <br>
      * When this parameter is set, the response body will include the service_tier utilized.
      */
-    private String serviceTier;
+    private ServiceTier serviceTier;
     /**
      * <b>Description: </b>
      * Up to 4 sequences where the API will stop generating further tokens.

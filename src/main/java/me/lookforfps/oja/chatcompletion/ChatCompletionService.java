@@ -3,7 +3,6 @@ package me.lookforfps.oja.chatcompletion;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import me.lookforfps.oja.aimodel.Model;
 import me.lookforfps.oja.chatcompletion.event.*;
 import me.lookforfps.oja.chatcompletion.hook.StreamEmitter;
 import me.lookforfps.oja.chatcompletion.model.natives.config.ChatCompletionConfiguration;
@@ -47,12 +46,12 @@ public class ChatCompletionService {
         this.mapper = new Mapper();
     }
 
-    public static ChatCompletionService build(String apiToken, Model Model, ChatCompletionConfiguration configuration) {
+    public static ChatCompletionService build(String apiToken, String modelIdentifier, ChatCompletionConfiguration configuration) {
         if(configuration==null) {
             configuration = new ChatCompletionConfiguration();
         }
         configuration.setApiToken(apiToken);
-        configuration.setModel(Model);
+        configuration.setModel(modelIdentifier);
         if(configuration.getApiToken()!=null && configuration.getModel()!=null) {
             return new ChatCompletionService(configuration);
         } else {
@@ -63,14 +62,8 @@ public class ChatCompletionService {
     public static ChatCompletionService build(ChatCompletionConfiguration configuration) {
         return build(configuration.getApiToken(), configuration.getModel(), configuration);
     }
-    public static ChatCompletionService build(String apiToken, String modelIdentifier, ChatCompletionConfiguration configuration) {
-        return build(apiToken, new Model(modelIdentifier), configuration);
-    }
-    public static ChatCompletionService build(String apiToken, Model Model) {
-        return build(apiToken, Model, null);
-    }
     public static ChatCompletionService build(String apiToken, String modelIdentifier) {
-        return build(apiToken, new Model(modelIdentifier));
+        return build(apiToken, modelIdentifier, null);
     }
 
     public ChatCompletionResponse sendRequest() throws IOException, URISyntaxException {
@@ -151,7 +144,7 @@ public class ChatCompletionService {
     private byte[] buildRequest() throws IOException {
         ChatCompletionRequestDto requestDto = new ChatCompletionRequestDto();
 
-        requestDto.setModel(config.getModel().getIdentifier());
+        requestDto.setModel(config.getModel());
         requestDto.setMessages(context);
 
         requestDto.setFrequency_penalty(config.getFrequencyPenalty());
@@ -165,7 +158,9 @@ public class ChatCompletionService {
             requestDto.setResponse_format(new ResponseFormat(config.getResponseType().getIdentifier()));
         }
         requestDto.setSeed(config.getSeed());
-        requestDto.setService_tier(config.getServiceTier());
+        if(config.getServiceTier() != null) {
+            requestDto.setService_tier(config.getServiceTier().getIdentifier());
+        }
         requestDto.setStop(config.getStop());
         requestDto.setStream(config.getStream());
         if(config.getIncludeUsageToStream() != null) {

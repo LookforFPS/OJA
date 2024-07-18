@@ -15,9 +15,9 @@ public enum ServiceTier {
      */
     DEFAULT("default");
 
-    private String name;
+    private String identifier;
 
-    ServiceTier(String name) {
-        this.name = name;
+    ServiceTier(String identifier) {
+        this.identifier = identifier;
     }
 }

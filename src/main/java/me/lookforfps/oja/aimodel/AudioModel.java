@@ -8,21 +8,21 @@ public enum AudioModel {
      * <b>Description: </b>
      * Whisper is a general-purpose speech recognition model. It is trained on a large dataset of diverse audio and is also a multi-task model that can perform multilingual speech recognition as well as speech translation and language identification.
      */
-    WHISPER_1(new Model("whisper-1")),
+    WHISPER_1("whisper-1"),
     /**
      * <b>Description: </b>
      * The latest text to speech model, optimized for speed.
      */
-    TTS_1(new Model("tts-1")),
+    TTS_1("tts-1"),
     /**
      * <b>Description: </b>
      * The latest text to speech model, optimized for quality.
      */
-    TTS_1_HD(new Model("tts-1-hd"));
+    TTS_1_HD("tts-1-hd");
 
-    private Model Model;
+    private String identifier;
 
-    AudioModel(Model Model) {
-        this.Model = Model;
+    AudioModel(String identifier) {
+        this.identifier = identifier;
     }
 }

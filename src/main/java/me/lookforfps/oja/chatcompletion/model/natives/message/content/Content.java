@@ -12,10 +12,10 @@ public class Content extends ArrayList<ContentEntry> {
         content.add(ContentEntry.createTextEntry(text));
         return content;
     }
-    public static Content createImageContentWithTextContent(String imageUrl, String text) {
+    public static Content createImageContent(String imageUrl, String additionalText) {
         Content content = new Content();
         content.add(ContentEntry.createImageEntry(imageUrl));
-        content.add(ContentEntry.createTextEntry(text));
+        content.add(ContentEntry.createTextEntry(additionalText));
         return content;
     }
     public static Content createImageContent(String imageUrl) {
