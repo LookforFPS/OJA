@@ -256,4 +256,8 @@ public class ChatCompletionService {
         context.remove(message);
         return this;
     }
+    public ChatCompletionService removeAllMessages() {
+        context.clear();
+        return this;
+    }
 }
