@@ -7,46 +7,47 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import me.lookforfps.oja.chatcompletion.model.natives.message.*;
+import me.lookforfps.oja.chatcompletion.model.natives.request.ChatCompletionRequestDto;
 import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponseDto;
 import me.lookforfps.oja.chatcompletion.model.natives.response.Choice;
 import me.lookforfps.oja.chatcompletion.model.natives.logprobs.LogProbs;
 import me.lookforfps.oja.chatcompletion.model.streaming.chunk.Chunk;
 import me.lookforfps.oja.chatcompletion.model.streaming.chunk.ChunkDto;
-import me.lookforfps.oja.model.RequestDto;
-import me.lookforfps.oja.model.ResponseDto;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Mapper {
+public class MappingService {
 
     private final ObjectMapper objectMapper;
     private final ObjectWriter objectWriter;
 
-    public Mapper() {
+    public MappingService() {
         this.objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         this.objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
     }
 
-    public String responseDtoToString(ResponseDto responseDto) throws JsonProcessingException {
+    public String responseDtoToString(ChatCompletionResponseDto responseDto) throws JsonProcessingException {
         return objectWriter.writeValueAsString(responseDto);
     }
 
-    public String requestDtoToString(RequestDto requestDto) throws JsonProcessingException {
+    public String requestDtoToString(ChatCompletionRequestDto requestDto) throws JsonProcessingException {
         return objectWriter.writeValueAsString(requestDto);
     }
 
-    public byte[] requestDtoToBytes(RequestDto requestDto) throws JsonProcessingException {
+    public byte[] requestDtoToBytes(ChatCompletionRequestDto requestDto) throws JsonProcessingException {
         return objectWriter.writeValueAsBytes(requestDto);
     }
 
-    public <T> T bytesToResponseDto(byte[] bytes, Class<T> responseType) throws IOException {
-        if(responseType.equals(ChatCompletionResponseDto.class)) {
-            return (T) bytesToChatCompletionResponseDto(bytes);
-        }
-        return objectMapper.readValue(bytes, responseType);
+    public ChatCompletionResponseDto bytesToResponseDto(byte[] bytes) throws IOException {
+        return bytesToChatCompletionResponseDto(bytes);
+    }
+
+    public Chunk bytesToChunk(byte[] chunkBytes) throws IOException {
+        ChunkDto chunkDto = objectMapper.readValue(chunkBytes, ChunkDto.class);
+        return chunkDtoToChunk(chunkDto);
     }
 
     private ChatCompletionResponseDto bytesToChatCompletionResponseDto(byte[] bytes) throws IOException {
@@ -64,7 +65,7 @@ public class Mapper {
     }
 
 
-    public List<Choice> jsonNodesToChoiceList(JsonNode choicesJsonNode) throws JsonProcessingException {
+    private List<Choice> jsonNodesToChoiceList(JsonNode choicesJsonNode) throws JsonProcessingException {
         List<Choice> choices = new ArrayList<>();
         if(choicesJsonNode.isArray()) {
             for(JsonNode choiceJsonNode : choicesJsonNode) {
@@ -77,7 +78,7 @@ public class Mapper {
         }
     }
 
-    public Choice jsonNodeToChoice(JsonNode choiceJsonNode) throws JsonProcessingException {
+    private Choice jsonNodeToChoice(JsonNode choiceJsonNode) throws JsonProcessingException {
         Choice choice = new Choice();
         choice.setIndex(choiceJsonNode.get("index").asInt());
         if(choiceJsonNode.get("finish_reason") != null) {
@@ -93,7 +94,7 @@ public class Mapper {
         return choice;
     }
 
-    public Message jsonNodeToMessage(JsonNode messageJsonNode) throws JsonProcessingException {
+    private Message jsonNodeToMessage(JsonNode messageJsonNode) throws JsonProcessingException {
         MessageRole role = MessageRole.fromIdentifier(messageJsonNode.get("role").asText());
         assert role != null;
         if(role.equals(MessageRole.SYSTEM)) {
@@ -108,12 +109,7 @@ public class Mapper {
         return null;
     }
 
-    public Chunk bytesToChunk(byte[] chunkBytes) throws IOException {
-        ChunkDto chunkDto = objectMapper.readValue(chunkBytes, ChunkDto.class);
-        return chunkDtoToChunk(chunkDto);
-    }
-
-    public Chunk chunkDtoToChunk(ChunkDto chunkDto) {
+    private Chunk chunkDtoToChunk(ChunkDto chunkDto) {
         Chunk chunk = new Chunk();
         chunk.setId(chunkDto.getId());
         chunk.setUsedModel(chunkDto.getModel());

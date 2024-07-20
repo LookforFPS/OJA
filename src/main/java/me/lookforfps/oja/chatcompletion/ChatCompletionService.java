@@ -18,7 +18,7 @@ import me.lookforfps.oja.chatcompletion.model.streaming.choice.Choice;
 import me.lookforfps.oja.chatcompletion.model.streaming.chunk.Chunk;
 import me.lookforfps.oja.chatcompletion.model.streaming.Stream;
 import me.lookforfps.oja.chatcompletion.hook.StreamListener;
-import me.lookforfps.oja.chatcompletion.mapping.Mapper;
+import me.lookforfps.oja.chatcompletion.mapping.MappingService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,11 +39,11 @@ public class ChatCompletionService {
     @Getter
     @Setter
     private List<Message> context = new ArrayList<>();
-    private final Mapper mapper;
+    private final MappingService mappingService;
 
     private ChatCompletionService(ChatCompletionConfiguration configuration) {
         this.config = configuration;
-        this.mapper = new Mapper();
+        this.mappingService = new MappingService();
     }
 
     public static ChatCompletionService build(String apiToken, String modelIdentifier, ChatCompletionConfiguration configuration) {
@@ -173,9 +173,9 @@ public class ChatCompletionService {
         requestDto.setParallel_tool_calls(config.getParallelToolCalls());
         requestDto.setUser(config.getUser());
 
-        log.debug("requestDto: " + mapper.requestDtoToString(requestDto));
+        log.debug("requestDto: " + mappingService.requestDtoToString(requestDto));
 
-        return mapper.requestDtoToBytes(requestDto);
+        return mappingService.requestDtoToBytes(requestDto);
     }
 
     private HttpURLConnection buildConnection() throws IOException, URISyntaxException {
@@ -192,8 +192,8 @@ public class ChatCompletionService {
     private ChatCompletionResponse buildResponse(String rawResponse) throws IOException {
         log.debug("rawResponse: "+rawResponse);
 
-        ChatCompletionResponseDto responseDto = mapper.bytesToResponseDto(rawResponse.getBytes(), ChatCompletionResponseDto.class);
-        log.debug("processedResponseDto: "+ mapper.responseDtoToString(responseDto));
+        ChatCompletionResponseDto responseDto = mappingService.bytesToResponseDto(rawResponse.getBytes());
+        log.debug("processedResponseDto: "+ mappingService.responseDtoToString(responseDto));
 
         ChatCompletionResponse response = new ChatCompletionResponse();
 
@@ -219,7 +219,7 @@ public class ChatCompletionService {
             log.debug("stream finished");
             return true;
         } else if(output.startsWith("{")) {
-            Chunk chunk = mapper.bytesToChunk(output.getBytes());
+            Chunk chunk = mappingService.bytesToChunk(output.getBytes());
             classifyChunkContent(streamContainer, chunk);
         } else {
             log.debug("empty chunk skipped");

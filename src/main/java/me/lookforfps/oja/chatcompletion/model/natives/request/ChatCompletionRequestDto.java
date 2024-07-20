@@ -2,21 +2,18 @@ package me.lookforfps.oja.chatcompletion.model.natives.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import me.lookforfps.oja.chatcompletion.model.natives.message.Message;
 import me.lookforfps.oja.chatcompletion.model.natives.tools.Tool;
 import me.lookforfps.oja.chatcompletion.model.streaming.StreamOptions;
-import me.lookforfps.oja.model.RequestDto;
 
 import java.util.HashMap;
 import java.util.List;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatCompletionRequestDto extends RequestDto {
+public class ChatCompletionRequestDto {
     private String model;
     private List<Message> messages;
     private Float frequency_penalty;
