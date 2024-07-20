@@ -1,24 +1,21 @@
 package me.lookforfps.oja.chatcompletion.model.natives.config;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseType;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ServiceTier;
 import me.lookforfps.oja.chatcompletion.model.natives.tools.Tool;
+import me.lookforfps.oja.config.Configuration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 @Data
-public class ChatCompletionConfiguration {
+@EqualsAndHashCode(callSuper = true)
+public class ChatCompletionConfiguration extends Configuration {
 
     private String apiUrl = "https://api.openai.com/v1/chat/completions";
-    private String apiToken;
-    /**
-     * <b>Description: </b>
-     * ID of the model to use.
-     */
-    private String model;
     /**
      * <b>Description: </b>
      * Specifies if the response, from the AI, should be automatically added to the context.
