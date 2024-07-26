@@ -1,8 +1,8 @@
 # OJA (OpenAI Java API)
 
-[version]: https://img.shields.io/github/v/tag/lookforfps/oja?label=Version
+[version]: https://img.shields.io/github/v/tag/lookforfps/OJA?label=Version
 [wiki-docs]: https://img.shields.io/badge/Wiki-Docs-%2368CBB0
-[licence]: https://img.shields.io/github/license/lookforfps/oja?label=Licence&color=%23fff
+[licence]: https://img.shields.io/github/license/lookforfps/OJA?label=Licence&color=%23fff
 
 [wiki-docs-link]: https://oja.lookforfps.dev/introduction/oja/
 [licence-link]: https://github.com/LookforFPS/OJA/blob/main/LICENSE.md
