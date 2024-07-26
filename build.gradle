@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-project.group = 'me.lookforfps.oja'
+project.group = 'me.lookforfps'
 project.description = "OpenAI Java API"
 project.version = new Version("0", "2", "0")
 
@@ -27,8 +27,19 @@ dependencies {
 }
 
 publishing {
+    repositories {
+        maven {
+            name = "nexus"
+            url = uri("https://repo.lookforfps.dev/repository/maven-releases/")
+            credentials {
+                username = project.findProperty("user") ?: System.getenv("USERNAME")
+                password = project.findProperty("token") ?: System.getenv("TOKEN")
+            }
+        }
+    }
+
     publications {
-        mavenJava(MavenPublication) {
+        maven(MavenPublication) {
             from(components.java)
 
             pom {
