@@ -24,8 +24,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -66,7 +65,7 @@ public class ChatCompletionService {
         return build(apiToken, modelIdentifier, null);
     }
 
-    public ChatCompletionResponse sendRequest() throws IOException, URISyntaxException {
+    public ChatCompletionResponse sendRequest() throws IOException {
         config.setStream(false);
 
         byte[] request = buildRequest();
@@ -91,11 +90,11 @@ public class ChatCompletionService {
         return response;
     }
 
-    public Stream sendStreamRequest() throws IOException, URISyntaxException {
+    public Stream sendStreamRequest() throws IOException {
         return sendStreamRequest(null);
     }
 
-    public Stream sendStreamRequest(StreamListener listener) throws IOException, URISyntaxException {
+    public Stream sendStreamRequest(StreamListener listener) throws IOException {
         config.setStream(true);
 
         StreamContainer streamContainer = new StreamContainer();
@@ -130,7 +129,7 @@ public class ChatCompletionService {
                 StreamStoppedEvent streamStoppedEvent = new StreamStoppedEvent(streamContainer.getChunkResult());
                 StreamEmitter.emitStreamStopped(streamStoppedEvent, streamContainer.getListeners());
                 log.debug("stream stopped");
-            } catch(IOException | URISyntaxException ex) {
+            } catch(IOException ex) {
                 throw new RuntimeException(ex);
             }
         });
@@ -178,8 +177,8 @@ public class ChatCompletionService {
         return mappingService.requestDtoToBytes(requestDto);
     }
 
-    private HttpURLConnection buildConnection() throws IOException, URISyntaxException {
-        HttpURLConnection con = (HttpURLConnection) new URI(config.getApiUrl()).toURL().openConnection();
+    private HttpURLConnection buildConnection() throws IOException {
+        HttpURLConnection con = (HttpURLConnection) new URL(config.getApiUrl()).openConnection();
 
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/json");
