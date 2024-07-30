@@ -1,4 +1,4 @@
-package me.lookforfps.oja.chatcompletion.model.natives.config;
+package me.lookforfps.oja.chatcompletion.config;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

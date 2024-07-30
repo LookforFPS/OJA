@@ -1,7 +1,7 @@
 package me.lookforfps.oja.chatcompletion.hook;
 
 import lombok.Data;
-import me.lookforfps.oja.chatcompletion.model.natives.response.Usage;
+import me.lookforfps.oja.usage.Usage;
 import me.lookforfps.oja.chatcompletion.model.natives.tools.ToolCall;
 import me.lookforfps.oja.chatcompletion.model.streaming.choice.Choice;
 import me.lookforfps.oja.chatcompletion.model.streaming.chunk.Chunk;

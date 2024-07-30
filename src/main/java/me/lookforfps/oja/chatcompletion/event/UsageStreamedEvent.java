@@ -3,7 +3,7 @@ package me.lookforfps.oja.chatcompletion.event;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import me.lookforfps.oja.chatcompletion.model.natives.response.Usage;
+import me.lookforfps.oja.usage.Usage;
 import me.lookforfps.oja.chatcompletion.model.streaming.chunk.Chunk;
 
 @Data

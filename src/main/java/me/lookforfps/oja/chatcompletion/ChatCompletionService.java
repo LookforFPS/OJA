@@ -5,7 +5,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import me.lookforfps.oja.chatcompletion.event.*;
 import me.lookforfps.oja.chatcompletion.hook.StreamEmitter;
-import me.lookforfps.oja.chatcompletion.model.natives.config.ChatCompletionConfiguration;
+import me.lookforfps.oja.chatcompletion.config.ChatCompletionConfiguration;
 import me.lookforfps.oja.chatcompletion.model.natives.message.AssistantMessage;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ChatCompletionRequestDto;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseFormat;
