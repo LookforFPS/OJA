@@ -40,6 +40,8 @@ Apart from that, OJA can be integrated into your software just like any other pa
 </dependency>
 ```
 
+Alternatively, you can download the project from the [repository](https://github.com/LookforFPS/OJA) and build it yourself using Gradle.
+
 ### Gradle
 ```groovy
 repositories {
