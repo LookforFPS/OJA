@@ -2,6 +2,7 @@ package me.lookforfps.oja.chatcompletion.config;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseFormat;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseType;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ServiceTier;
 import me.lookforfps.oja.chatcompletion.model.natives.tools.Tool;
@@ -111,7 +112,7 @@ public class ChatCompletionConfiguration extends Configuration {
      * <br><br>
      * Setting to <code>{ "type": "json_object" }</code> enables JSON mode, which guarantees the message the model generates is valid JSON.
      */
-    private ResponseType responseType;
+    private ResponseFormat responseFormat;
     /**
      * What sampling temperature to use, between 0 and 2.
      * Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.<br>
@@ -162,5 +163,12 @@ public class ChatCompletionConfiguration extends Configuration {
     }
     public void removeTool(int toolIndex) {
         tools.remove(toolIndex);
+    }
+
+    public void setResponseFormat(ResponseType responsetype) {
+        this.responseFormat = new ResponseFormat(responsetype.getIdentifier());
+    }
+    public void setResponseFormat(String jsonSchema) {
+        this.responseFormat = new ResponseFormat("json_schema", jsonSchema);
     }
 }
