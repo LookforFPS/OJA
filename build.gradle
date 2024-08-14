@@ -5,7 +5,7 @@ plugins {
 
 project.group = 'me.lookforfps'
 project.description = "OpenAI Java API"
-project.version = new Version("1", "0", "0", "preview")
+project.version = new Version("1", "0", "1")
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
