@@ -10,5 +10,6 @@ public class Delta {
 
     private String role;
     private String content;
+    private String refusal;
     private List<ToolCall> tool_calls;
 }

@@ -153,9 +153,7 @@ public class ChatCompletionService {
         requestDto.setMax_tokens(config.getMaxTokens());
         requestDto.setN(config.getChoices());
         requestDto.setPresence_penalty(config.getPresencePenalty());
-        if(config.getResponseType() != null) {
-            requestDto.setResponse_format(new ResponseFormat(config.getResponseType().getIdentifier()));
-        }
+        requestDto.setResponse_format(config.getResponseFormat());
         requestDto.setSeed(config.getSeed());
         if(config.getServiceTier() != null) {
             requestDto.setService_tier(config.getServiceTier().getIdentifier());
