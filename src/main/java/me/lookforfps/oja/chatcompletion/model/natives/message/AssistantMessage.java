@@ -14,14 +14,19 @@ public class AssistantMessage extends Message {
 
     private String content;
     private String name;
+    private String refusal;
     private List<ToolCall> tool_calls;
 
 
-    public AssistantMessage(String content, String name, List<ToolCall> tool_calls) {
+    public AssistantMessage(String content, String name, String refusal, List<ToolCall> tool_calls) {
         super(MessageRole.ASSISTANT);
         this.content = content;
         this.name = name;
+        this.refusal = refusal;
         this.tool_calls = tool_calls;
+    }
+    public AssistantMessage(String content, String name, List<ToolCall> tool_calls) {
+        this(content, name, null, tool_calls);
     }
     public AssistantMessage(String content, List<ToolCall> tool_calls) {
         this(content, null, tool_calls);
