@@ -10,9 +10,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LogProbs {
-    /**
-     * <b>Description: </b>
-     * A list of message content tokens with log probability information.
-     */
+
     private List<LogProbContent> content;
 }
