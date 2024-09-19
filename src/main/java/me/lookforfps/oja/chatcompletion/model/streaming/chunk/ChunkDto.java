@@ -1,7 +1,7 @@
 package me.lookforfps.oja.chatcompletion.model.streaming.chunk;
 
 import lombok.Data;
-import me.lookforfps.oja.usage.Usage;
+import me.lookforfps.oja.chatcompletion.model.natives.usage.Usage;
 import me.lookforfps.oja.chatcompletion.model.streaming.choice.Choice;
 
 import java.util.List;

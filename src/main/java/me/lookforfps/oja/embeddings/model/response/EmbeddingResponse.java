@@ -3,8 +3,8 @@ package me.lookforfps.oja.embeddings.model.response;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import me.lookforfps.oja.usage.Usage;
 import me.lookforfps.oja.embeddings.model.data.Data;
+import me.lookforfps.oja.embeddings.usage.Usage;
 
 import java.util.List;
 
