@@ -73,6 +73,15 @@ service.addMessage(new UserMessage("What is the biggest City in the world?"));
 ChatCompletionResponse response = service.sendRequest();
 ```
 
+### Embeddings
+First, we build a `EmbeddingService` according to our needs.
+Then we send the request with the content we wish to convert into embeddings.
+```java
+EmbeddingService service = EmbeddingService.build("put$your#api%token§here", EmbeddingModel.TEXT_EMBEDDING_3_LARGE.getIdentifier());
+
+EmbeddingResponse response = service.sendRequest("something you want to convert");
+```
+
 ## Documentation
 
 Due to the extensive range of core features that we will be offering, providing a detailed documentation within the repository's README alone is not possible.
