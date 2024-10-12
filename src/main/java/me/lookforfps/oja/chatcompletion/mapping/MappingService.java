@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import me.lookforfps.oja.chatcompletion.model.natives.message.*;
+import me.lookforfps.oja.chatcompletion.model.natives.message.content.*;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ChatCompletionRequestDto;
 import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponseDto;
 import me.lookforfps.oja.chatcompletion.model.natives.response.Choice;
@@ -96,6 +97,39 @@ public class MappingService {
         return choice;
     }
 
+    private Content jsonNodeToContent(JsonNode contentJsonNode) throws JsonProcessingException {
+        Content content = new Content();
+
+        if(contentJsonNode.isArray()) {
+            for(JsonNode contentEntryJsonNode : contentJsonNode) {
+                ContentEntry contentEntry = jsonNodeToContentEntry(contentEntryJsonNode);
+                content.add(contentEntry);
+            }
+            return content;
+        } else {
+            return null;
+        }
+    }
+
+    private ContentEntry jsonNodeToContentEntry(JsonNode contentEntryJsonNode) throws JsonProcessingException {
+        ContentEntry contentEntry = new ContentEntry();
+
+        ContentType contentType = ContentType.fromIdentifier(contentEntryJsonNode.get("type").asText());
+
+        assert contentType != null;
+        if(contentType.equals(ContentType.TEXT)) {
+            contentEntry = objectMapper.treeToValue(contentEntryJsonNode, TextContent.class);
+        }
+        if(contentType.equals(ContentType.IMAGE_URL)) {
+            contentEntry = objectMapper.treeToValue(contentEntryJsonNode, ImageContent.class);
+        }
+        if(contentType.equals(ContentType.REFUSAL)) {
+            contentEntry = objectMapper.treeToValue(contentEntryJsonNode, RefusalContent.class);
+        }
+
+        return contentEntry;
+    }
+
     private Message jsonNodeToMessage(JsonNode messageJsonNode) throws JsonProcessingException {
         MessageRole role = MessageRole.fromIdentifier(messageJsonNode.get("role").asText());
         assert role != null;
@@ -104,7 +138,27 @@ public class MappingService {
         } else if(role.equals(MessageRole.USER)) {
             return objectMapper.treeToValue(messageJsonNode, UserMessage.class);
         } else if(role.equals(MessageRole.ASSISTANT)) {
-            return objectMapper.treeToValue(messageJsonNode, AssistantMessage.class);
+            if(messageJsonNode.has("content")) {
+                if(messageJsonNode.get("content").isArray()) {
+                    Content content = jsonNodeToContent(messageJsonNode.get("content"));
+
+                    ((ObjectNode) messageJsonNode).set("content", objectMapper.readTree("[]"));
+                    AssistantMessage assistantMessage = objectMapper.treeToValue(messageJsonNode, AssistantMessage.class);
+                    assistantMessage.setContent(content);
+
+                    return assistantMessage;
+                } else {
+                    Content content = Content.createTextContent(messageJsonNode.get("content").asText());
+
+                    ((ObjectNode) messageJsonNode).set("content", objectMapper.readTree("[]"));
+                    AssistantMessage assistantMessage = objectMapper.treeToValue(messageJsonNode, AssistantMessage.class);
+                    assistantMessage.setContent(content);
+
+                    return assistantMessage;
+                }
+            } else {
+                return objectMapper.treeToValue(messageJsonNode, AssistantMessage.class);
+            }
         } else if(role.equals(MessageRole.TOOL)) {
             return objectMapper.treeToValue(messageJsonNode, ToolMessage.class);
         }

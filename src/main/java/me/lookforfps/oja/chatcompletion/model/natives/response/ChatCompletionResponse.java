@@ -22,7 +22,7 @@ public class ChatCompletionResponse {
     private String serviceTier;
 
     public String getTextContent(Integer choiceIndex) {
-        return choices.get(choiceIndex).getMessage().asAssistantMessage().getContent();
+        return choices.get(choiceIndex).getMessage().asAssistantMessage().getContent().getTextContent();
     }
     public String getTextContent() {
         return getTextContent(0);

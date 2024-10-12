@@ -17,6 +17,6 @@ public class Choice {
     private String finish_reason;
 
     public String getTextContent() {
-        return message.asAssistantMessage().getContent();
+        return message.asAssistantMessage().getContent().getTextContent();
     }
 }
