@@ -146,11 +146,14 @@ public class ChatCompletionService {
         requestDto.setModel(config.getModel());
         requestDto.setMessages(context);
 
+        requestDto.setStore(config.getStore());
+        requestDto.setMetadata(config.getMetadata());
         requestDto.setFrequency_penalty(config.getFrequencyPenalty());
         requestDto.setLogit_bias(config.getLogitBias());
         requestDto.setLogprobs(config.getLogprobs());
         requestDto.setTop_logprobs(config.getTopLogprobs());
         requestDto.setMax_tokens(config.getMaxTokens());
+        requestDto.setMax_completion_tokens(config.getMaxCompletionTokens());
         requestDto.setN(config.getChoices());
         requestDto.setPresence_penalty(config.getPresencePenalty());
         requestDto.setResponse_format(config.getResponseFormat());

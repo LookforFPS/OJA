@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ImageURL {
     private String url;
+    private String detail;
 }

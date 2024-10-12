@@ -11,4 +11,5 @@ public class Function {
     private String name;
     private String description;
     private Parameters parameters;
+    private Boolean strict;
 }
