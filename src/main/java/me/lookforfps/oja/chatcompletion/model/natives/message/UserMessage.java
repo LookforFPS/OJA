@@ -21,6 +21,7 @@ public class UserMessage extends Message {
     public UserMessage(String content, String name) {
         this(Content.createTextContent(content), name);
     }
+
     public UserMessage(Content content) {
         this(content, null);
     }

@@ -8,7 +8,6 @@ import me.lookforfps.oja.chatcompletion.hook.StreamEmitter;
 import me.lookforfps.oja.chatcompletion.config.ChatCompletionConfiguration;
 import me.lookforfps.oja.chatcompletion.model.natives.message.AssistantMessage;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ChatCompletionRequestDto;
-import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseFormat;
 import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponse;
 import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponseDto;
 import me.lookforfps.oja.chatcompletion.model.natives.message.Message;
@@ -66,7 +65,7 @@ public class ChatCompletionService {
     }
 
     public ChatCompletionResponse sendRequest() throws IOException {
-        config.setStream(false);
+        config.setStream(null);
 
         byte[] request = buildRequest();
         HttpURLConnection con = buildConnection();

@@ -26,14 +26,33 @@ public class AssistantMessage extends Message {
         this.refusal = refusal;
         this.tool_calls = tool_calls;
     }
+    public AssistantMessage(String content, String name, String refusal, List<ToolCall> tool_calls) {
+        this(Content.createTextContent(content), name, refusal, tool_calls);
+    }
+
+    public AssistantMessage(Content content, String name, List<ToolCall> tool_calls) {
+        this(content, name, null, tool_calls);
+    }
     public AssistantMessage(String content, String name, List<ToolCall> tool_calls) {
         this(content, name, null, tool_calls);
+    }
+
+    public AssistantMessage(Content content, List<ToolCall> tool_calls) {
+        this(content, null, tool_calls);
     }
     public AssistantMessage(String content, List<ToolCall> tool_calls) {
         this(content, null, tool_calls);
     }
+
+    public AssistantMessage(Content content, String name) {
+        this(content, name, null);
+    }
     public AssistantMessage(String content, String name) {
         this(content, name, null);
+    }
+
+    public AssistantMessage(Content content) {
+        this(content,(String) null);
     }
     public AssistantMessage(String content) {
         this(content,(String) null);

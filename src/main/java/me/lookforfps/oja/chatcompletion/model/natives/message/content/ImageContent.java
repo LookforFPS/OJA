@@ -16,6 +16,7 @@ public class ImageContent extends ContentEntry {
         this.image_url = new ImageURL(image_url, detail);
     }
     public ImageContent(String image_url) {
-        this.image_url = new ImageURL(image_url);
+        this(image_url, null);
     }
+
 }

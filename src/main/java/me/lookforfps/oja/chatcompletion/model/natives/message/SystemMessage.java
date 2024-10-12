@@ -17,6 +17,7 @@ public class SystemMessage extends Message {
         this.content = content;
         this.name = name;
     }
+
     public SystemMessage(String content) {
         this(content, null);
     }
