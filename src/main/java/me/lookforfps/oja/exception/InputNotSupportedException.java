@@ -1,4 +1,4 @@
-package me.lookforfps.oja.embeddings.exception;
+package me.lookforfps.oja.exception;
 
 public class InputNotSupportedException extends Exception {
 
