@@ -9,7 +9,9 @@ import me.lookforfps.oja.moderation.mapping.MappingService;
 import me.lookforfps.oja.moderation.model.input.MultiModalInput;
 import me.lookforfps.oja.moderation.model.input.StringArrayInput;
 import me.lookforfps.oja.moderation.model.input.StringInput;
+import me.lookforfps.oja.moderation.model.input.inputentry.ImageInputEntry;
 import me.lookforfps.oja.moderation.model.input.inputentry.InputEntry;
+import me.lookforfps.oja.moderation.model.input.inputentry.TextInputEntry;
 import me.lookforfps.oja.moderation.model.request.ModerationRequestDto;
 import me.lookforfps.oja.moderation.model.response.ModerationResponse;
 
@@ -90,10 +92,11 @@ public class ModerationService {
     }
     private ModerationRequestDto buildInput(List<?> input) throws InputNotSupportedException {
         if(input!=null && !input.isEmpty()) {
-            if(input.get(0).getClass() == String.class) {
+            Object inputClass = input.get(0).getClass();
+            if(inputClass == String.class) {
                 log.debug("String-Array input detected");
                 return new StringArrayInput((List<String>) input);
-            } else if(input.get(0).getClass() == InputEntry.class) {
+            } else if(inputClass == ImageInputEntry.class || inputClass == TextInputEntry.class) {
                 log.debug("Multi-Modal input detected");
                 return new MultiModalInput((List<InputEntry>) input);
             } else {
