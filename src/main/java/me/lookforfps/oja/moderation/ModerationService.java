@@ -3,6 +3,7 @@ package me.lookforfps.oja.moderation;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import me.lookforfps.oja.aimodel.ModerationModel;
 import me.lookforfps.oja.exception.InputNotSupportedException;
 import me.lookforfps.oja.moderation.config.ModerationConfiguration;
 import me.lookforfps.oja.moderation.mapping.MappingService;
@@ -48,8 +49,14 @@ public class ModerationService {
             return null;
         }
     }
+    public static ModerationService build(String apiToken, ModerationModel model, ModerationConfiguration configuration) {
+        return build(apiToken, model.getIdentifier(), configuration);
+    }
     public static ModerationService build(ModerationConfiguration configuration) {
         return build(configuration.getApiToken(), configuration.getModel(), configuration);
+    }
+    public static ModerationService build(String apiToken, ModerationModel model) {
+        return build(apiToken, model.getIdentifier(), null);
     }
     public static ModerationService build(String apiToken, String modelIdentifier) {
         return build(apiToken, modelIdentifier, null);

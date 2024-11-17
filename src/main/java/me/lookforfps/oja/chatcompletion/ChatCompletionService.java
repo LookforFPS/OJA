@@ -3,6 +3,7 @@ package me.lookforfps.oja.chatcompletion;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import me.lookforfps.oja.aimodel.ChatCompletionModel;
 import me.lookforfps.oja.chatcompletion.event.*;
 import me.lookforfps.oja.chatcompletion.hook.StreamEmitter;
 import me.lookforfps.oja.chatcompletion.config.ChatCompletionConfiguration;
@@ -57,8 +58,14 @@ public class ChatCompletionService {
             return null;
         }
     }
+    public static ChatCompletionService build(String apiToken, ChatCompletionModel model, ChatCompletionConfiguration configuration) {
+        return build(apiToken, model.getIdentifier(), configuration);
+    }
     public static ChatCompletionService build(ChatCompletionConfiguration configuration) {
         return build(configuration.getApiToken(), configuration.getModel(), configuration);
+    }
+    public static ChatCompletionService build(String apiToken, ChatCompletionModel model) {
+        return build(apiToken, model.getIdentifier(), null);
     }
     public static ChatCompletionService build(String apiToken, String modelIdentifier) {
         return build(apiToken, modelIdentifier, null);

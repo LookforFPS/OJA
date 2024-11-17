@@ -3,6 +3,8 @@ package me.lookforfps.oja.embeddings;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import me.lookforfps.oja.aimodel.EmbeddingModel;
+import me.lookforfps.oja.aimodel.ModerationModel;
 import me.lookforfps.oja.embeddings.mapping.MappingService;
 import me.lookforfps.oja.embeddings.config.EmbeddingConfiguration;
 import me.lookforfps.oja.embeddings.model.input.NestedIntegerArrayInput;
@@ -46,8 +48,14 @@ public class EmbeddingService {
             return null;
         }
     }
+    public static EmbeddingService build(String apiToken, ModerationModel model, EmbeddingConfiguration configuration) {
+        return build(apiToken, model.getIdentifier(), configuration);
+    }
     public static EmbeddingService build(EmbeddingConfiguration configuration) {
         return build(configuration.getApiToken(), configuration.getModel(), configuration);
+    }
+    public static EmbeddingService build(String apiToken, EmbeddingModel model) {
+        return build(apiToken, model.getIdentifier(), null);
     }
     public static EmbeddingService build(String apiToken, String modelIdentifier) {
         return build(apiToken, modelIdentifier, null);

@@ -2,6 +2,7 @@ package me.lookforfps.oja.chatcompletion.config;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import me.lookforfps.oja.aimodel.ChatCompletionModel;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseFormat;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseType;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ServiceTier;
@@ -45,6 +46,10 @@ public class ChatCompletionConfiguration extends Configuration {
     private String toolChoice;
     private Boolean parallelToolCalls;
     private String user;
+
+    public void setModel(ChatCompletionModel model) {
+        this.setModel(model.getIdentifier());
+    }
 
     public void addTool(Tool tool) {
         if(tools == null) {
