@@ -12,9 +12,9 @@ public class Chunk {
     private String id;
     private List<Choice> choices;
     private Integer created;
-    private String usedModel;
-    private String serviceTier;
-    private String systemFingerprint;
+    private String model;
+    private String service_tier;
+    private String system_fingerprint;
     private String object;
     private Usage usage;
 

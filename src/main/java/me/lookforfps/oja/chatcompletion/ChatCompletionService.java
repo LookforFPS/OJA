@@ -11,7 +11,6 @@ import me.lookforfps.oja.chatcompletion.config.ChatCompletionConfiguration;
 import me.lookforfps.oja.chatcompletion.model.natives.message.AssistantMessage;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ChatCompletionRequestDto;
 import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponse;
-import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponseDto;
 import me.lookforfps.oja.chatcompletion.model.natives.message.Message;
 import me.lookforfps.oja.chatcompletion.hook.StreamContainer;
 import me.lookforfps.oja.chatcompletion.model.streaming.StreamOptions;
@@ -232,19 +231,8 @@ public class ChatCompletionService {
     private ChatCompletionResponse buildResponseContent(String rawResponse) throws IOException {
         log.debug("rawResponse: "+rawResponse);
 
-        ChatCompletionResponseDto responseDto = mappingService.bytesToResponseDto(rawResponse.getBytes());
-        log.debug("processedResponseDto: "+ mappingService.responseDtoToString(responseDto));
-
-        ChatCompletionResponse response = new ChatCompletionResponse();
-
-        response.setId(responseDto.getId());
-        response.setObjectType(responseDto.getObject());
-        response.setCreated(responseDto.getCreated());
-        response.setUsedModel(responseDto.getModel());
-        response.setSystemFingerprint(responseDto.getSystem_fingerprint());
-        response.setUsage(responseDto.getUsage());
-        response.setChoices(responseDto.getChoices());
-        response.setServiceTier(responseDto.getService_tier());
+        ChatCompletionResponse response = mappingService.bytesToResponse(rawResponse.getBytes());
+        log.debug("processedResponseDto: "+ mappingService.responseToString(response));
 
         return response;
     }
