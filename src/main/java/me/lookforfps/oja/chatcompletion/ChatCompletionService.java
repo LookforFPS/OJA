@@ -223,34 +223,34 @@ public class ChatCompletionService {
         requestDto.setUser(config.getUser());
 
         byte[] requestContent = mappingService.requestDtoToBytes(requestDto);
-        log.debug("requestDto: " + mappingService.requestDtoToString(requestDto));
+        log.debug("requestDto: {}", new String(requestContent));
 
         return RequestBody.create(requestContent, MediaType.get("application/json"));
     }
 
     private ChatCompletionResponse buildResponseContent(String rawResponse) throws IOException {
-        log.debug("rawResponse: "+rawResponse);
+        log.debug("rawResponse: {}", rawResponse);
 
         ChatCompletionResponse response = mappingService.bytesToResponse(rawResponse.getBytes());
-        log.debug("processedResponseDto: "+ mappingService.responseToString(response));
+        log.debug("processedResponse: {}", mappingService.responseToString(response));
 
         return response;
     }
 
     private boolean classifyChunk(StreamContainer streamContainer, String rawChunk) throws IOException {
         String output = rawChunk.replace("data: ", "");
-        log.debug("chunkResponse: "+output);
+        log.debug("chunkResponse: {}", output);
 
         if(output.equalsIgnoreCase("[DONE]")) {
             StreamFinishedEvent streamFinishedEvent = new StreamFinishedEvent(streamContainer.getChunkResult(), streamContainer.getChunkResult().getChoices().get(0).getFinish_reason());
             StreamEmitter.emitStreamFinished(streamFinishedEvent, streamContainer.getListeners());
-            log.debug("stream finished");
+            log.debug("Stream finished");
             return true;
         } else if(output.startsWith("{")) {
             Chunk chunk = mappingService.bytesToChunk(output.getBytes());
             classifyChunkContent(streamContainer, chunk);
         } else {
-            log.debug("empty chunk skipped");
+            log.debug("Empty chunk skipped");
         }
         return false;
     }

@@ -139,16 +139,16 @@ public class ModerationService {
         requestDto.setModel(config.getModel());
 
         byte[] requestContent = mappingService.requestDtoToBytes(requestDto);
-        log.debug("requestDto: " + mappingService.requestDtoToString(requestDto));
+        log.debug("requestDto: {}", new String(requestContent));
 
         return RequestBody.create(requestContent, MediaType.get("application/json"));
     }
 
     private ModerationResponse buildResponseContent(String rawResponse) throws IOException {
-        log.debug("rawResponse: "+rawResponse);
+        log.debug("rawResponse: {}", rawResponse);
 
         ModerationResponse response = mappingService.bytesToResponse(rawResponse.getBytes());
-        log.debug("processedResponse: "+ mappingService.responseToString(response));
+        log.debug("processedResponse: {}", mappingService.responseToString(response));
 
         return response;
     }
