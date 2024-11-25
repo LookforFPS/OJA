@@ -1,5 +1,6 @@
 package me.lookforfps.oja.embeddings;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -13,13 +14,14 @@ import me.lookforfps.oja.embeddings.model.input.StringArrayInput;
 import me.lookforfps.oja.embeddings.model.input.StringInput;
 import me.lookforfps.oja.embeddings.model.request.EmbeddingRequestDto;
 import me.lookforfps.oja.embeddings.model.response.EmbeddingResponse;
-import me.lookforfps.oja.exception.InputNotSupportedException;
+import me.lookforfps.oja.error.ErrorHandler;
+import me.lookforfps.oja.error.exception.ApiErrorException;
+import me.lookforfps.oja.error.exception.InputNotSupportedException;
+import me.lookforfps.oja.error.exception.RequestErrorException;
+import okhttp3.*;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.List;
 
 @Slf4j
@@ -28,11 +30,14 @@ public class EmbeddingService {
     @Getter
     @Setter
     private EmbeddingConfiguration config;
+
     private final MappingService mappingService;
+    private final ErrorHandler errorHandler;
 
     private EmbeddingService(EmbeddingConfiguration configuration) {
         this.config = configuration;
         this.mappingService = new MappingService();
+        this.errorHandler = new ErrorHandler();
     }
 
     public static EmbeddingService build(String apiToken, String modelIdentifier, EmbeddingConfiguration configuration) {
@@ -62,31 +67,40 @@ public class EmbeddingService {
     }
 
 
-    public EmbeddingResponse sendRequest(String input) throws IOException, InputNotSupportedException {
+    public EmbeddingResponse sendRequest(String input) throws ApiErrorException, RequestErrorException {
         EmbeddingRequestDto requestDto = buildInput(input);
-        byte[] request = buildRequest(requestDto);
 
-        return sendRequest(request);
+        return sendRequest(requestDto);
     }
-    public EmbeddingResponse sendRequest(List<?> input) throws IOException, InputNotSupportedException {
+    public EmbeddingResponse sendRequest(List<?> input) throws ApiErrorException, RequestErrorException {
         EmbeddingRequestDto requestDto = buildInput(input);
-        byte[] request = buildRequest(requestDto);
 
-        return sendRequest(request);
+        return sendRequest(requestDto);
     }
-    private EmbeddingResponse sendRequest(byte[] request) throws IOException {
-        HttpURLConnection con = buildConnection();
+    private EmbeddingResponse sendRequest(EmbeddingRequestDto requestDto) throws ApiErrorException, RequestErrorException {
+        OkHttpClient client = new OkHttpClient();
 
-        con.getOutputStream().write(request);
+        try {
+            RequestBody requestBody = buildRequestBody(requestDto);
+            Request request = buildRequest(requestBody);
 
-        String output = new BufferedReader(new InputStreamReader(con.getInputStream())).lines()
-                .reduce((a, b) -> a + b).get();
+            Response response = client.newCall(request).execute();
 
-        con.disconnect();
-
-        EmbeddingResponse response = buildResponse(output);
-
-        return response;
+            if(response.code() == 200) {
+                return buildResponseContent(response.body().string());
+            } else {
+                errorHandler.handleApiError(response);
+                return null;
+            }
+        } catch (UnknownHostException ex) {
+            log.error("DNS resolution failed: {}", ex.getMessage());
+            errorHandler.handleRequestError(ex);
+            return null;
+        } catch (IOException ex) {
+            log.error("I/O error during request: {}", ex.getMessage());
+            errorHandler.handleRequestError(ex);
+            return null;
+        }
     }
 
     private EmbeddingRequestDto buildInput(String input) throws InputNotSupportedException {
@@ -124,7 +138,15 @@ public class EmbeddingService {
         }
     }
 
-    private byte[] buildRequest(EmbeddingRequestDto requestDto) throws IOException {
+    private Request buildRequest(RequestBody requestBody) {
+        return new Request.Builder()
+                .url(config.getApiUrl())
+                .addHeader("Authorization", "Bearer " + config.getApiToken())
+                .post(requestBody)
+                .build();
+    }
+
+    private RequestBody buildRequestBody(EmbeddingRequestDto requestDto) throws JsonProcessingException {
         requestDto.setModel(config.getModel());
 
         requestDto.setDimensions(config.getDimensions());
@@ -133,23 +155,13 @@ public class EmbeddingService {
         }
         requestDto.setUser(config.getUser());
 
+        byte[] requestContent = mappingService.requestDtoToBytes(requestDto);
         log.debug("requestDto: " + mappingService.requestDtoToString(requestDto));
 
-        return mappingService.requestDtoToBytes(requestDto);
+        return RequestBody.create(requestContent, MediaType.get("application/json"));
     }
 
-    private HttpURLConnection buildConnection() throws IOException {
-        HttpURLConnection con = (HttpURLConnection) new URL(config.getApiUrl()).openConnection();
-
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("Authorization", "Bearer " + config.getApiToken());
-
-        con.setDoOutput(true);
-        return con;
-    }
-
-    private EmbeddingResponse buildResponse(String rawResponse) throws IOException {
+    private EmbeddingResponse buildResponseContent(String rawResponse) throws IOException {
         log.debug("rawResponse: "+rawResponse);
 
         EmbeddingResponse response = mappingService.bytesToResponse(rawResponse.getBytes());

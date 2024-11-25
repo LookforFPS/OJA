@@ -3,9 +3,10 @@
 jackson-databind = "2.17.2"
 lombok = "1.18.34"
 slf4j = "2.0.16"
+okhttp = "4.12.0"
 
 [libraries]
-
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp"}
