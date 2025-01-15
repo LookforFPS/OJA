@@ -12,7 +12,7 @@
 [![licence][]][licence-link]
 
 OJA is an open-source Java library designed to simplify the integration of OpenAI's API into Java environments.
-It allows developers to easily use OpenAI's AI models for tasks like chat completions and embeddings.
+It allows developers to easily use OpenAI's AI models for tasks like chat completions, embeddings and moderation.
 
 ## Installation
 
@@ -66,6 +66,7 @@ service.addMessage(new SystemMessage("You are an Assistant named Sarah."));
 service.addMessage(new UserMessage("What is the biggest City in the world?"));
 
 ChatCompletionResponse response = service.sendRequest();
+System.out.println("Answer: "+response.getTextContent());
 ```
 
 ### Embeddings
@@ -75,7 +76,20 @@ Then we send the request with the content we wish to convert into embeddings.
 EmbeddingService service = EmbeddingService.build("put$your#api%token§here", EmbeddingModel.TEXT_EMBEDDING_3_LARGE.getIdentifier());
 
 EmbeddingResponse response = service.sendRequest("something you want to convert");
+System.out.println("Embedding: "+embeddingResponse.getFloatEmbedding());
 ```
+
+### Moderation
+
+First, we build a `ModerationService` according to our needs.
+Then we send the request with the content we want to moderate.
+```java
+ModerationService service = ModerationService.build("put$your#api%token§here");
+
+ModerationResponse response = service.sendRequest("content you want to check for moderation rules");
+System.out.println("Flagged: "+response.getResult().getFlagged());
+```
+
 
 ## Documentation
 
