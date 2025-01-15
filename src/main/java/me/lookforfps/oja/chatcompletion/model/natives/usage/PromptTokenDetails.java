@@ -7,11 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CompletionTokenDetails {
+public class PromptTokenDetails {
 
-    private Integer reasoning_tokens;
+    private Integer cached_tokens;
     private Integer audio_tokens;
-    private Integer accepted_prediction_tokens;
-    private Integer rejected_prediction_tokens;
 
 }

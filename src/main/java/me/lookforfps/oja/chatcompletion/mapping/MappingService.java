@@ -133,6 +133,8 @@ public class MappingService {
         assert role != null;
         if(role.equals(MessageRole.SYSTEM)) {
             return objectMapper.treeToValue(messageJsonNode, SystemMessage.class);
+        } else if(role.equals(MessageRole.DEVELOPER)) {
+            return objectMapper.treeToValue(messageJsonNode, DeveloperMessage.class);
         } else if(role.equals(MessageRole.USER)) {
             return objectMapper.treeToValue(messageJsonNode, UserMessage.class);
         } else if(role.equals(MessageRole.ASSISTANT)) {

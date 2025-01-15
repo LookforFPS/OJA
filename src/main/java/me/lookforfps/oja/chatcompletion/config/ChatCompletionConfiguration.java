@@ -3,6 +3,7 @@ package me.lookforfps.oja.chatcompletion.config;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import me.lookforfps.oja.aimodel.ChatCompletionModel;
+import me.lookforfps.oja.chatcompletion.model.natives.request.ReasoningEffort;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseFormat;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseType;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ServiceTier;
@@ -24,6 +25,7 @@ public class ChatCompletionConfiguration extends Configuration {
     private Integer aiResponseChoiceIndex = 0;
 
     private Boolean store;
+    private ReasoningEffort reasoningEffort;
     private Map<String, String> metadata;
     private Float frequencyPenalty;
     private HashMap<String, Integer> logitBias;

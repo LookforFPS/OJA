@@ -18,6 +18,7 @@ public class ChatCompletionRequestDto {
     private String model;
     private List<Message> messages;
     private Boolean store;
+    private String reasoning_effort;
     private Map<String, String> metadata;
     private Float frequency_penalty;
     private HashMap<String, Integer> logit_bias;

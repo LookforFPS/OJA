@@ -196,6 +196,9 @@ public class ChatCompletionService {
         requestDto.setMessages(context);
 
         requestDto.setStore(config.getStore());
+        if(config.getReasoningEffort() != null) {
+            requestDto.setReasoning_effort(config.getReasoningEffort().getIdentifier());
+        }
         requestDto.setMetadata(config.getMetadata());
         requestDto.setFrequency_penalty(config.getFrequencyPenalty());
         requestDto.setLogit_bias(config.getLogitBias());
