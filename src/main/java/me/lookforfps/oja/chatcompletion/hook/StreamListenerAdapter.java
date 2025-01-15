@@ -22,4 +22,7 @@ public class StreamListenerAdapter implements StreamListener {
     @Override
     public void onStreamStopped(StreamStoppedEvent event) {}
 
+    @Override
+    public void onStreamFailed(Exception exception) {}
+
 }

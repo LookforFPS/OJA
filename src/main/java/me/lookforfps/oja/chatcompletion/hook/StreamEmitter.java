@@ -50,4 +50,11 @@ public class StreamEmitter {
         log.debug("Emitted stream stopped event to "+listeners.size()+" listeners");
     }
 
+    public static void emitStreamFailed(Exception exception, List<StreamListener> listeners) {
+        for (StreamListener listener : listeners) {
+            listener.onStreamFailed(exception);
+        }
+        log.debug("Emitted stream failed event to "+listeners.size()+" listeners");
+    }
+
 }

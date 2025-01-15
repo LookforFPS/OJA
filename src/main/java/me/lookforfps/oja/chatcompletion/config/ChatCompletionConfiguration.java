@@ -2,6 +2,8 @@ package me.lookforfps.oja.chatcompletion.config;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import me.lookforfps.oja.aimodel.ChatCompletionModel;
+import me.lookforfps.oja.chatcompletion.model.natives.request.ReasoningEffort;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseFormat;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseType;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ServiceTier;
@@ -11,6 +13,7 @@ import me.lookforfps.oja.config.Configuration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -20,11 +23,17 @@ public class ChatCompletionConfiguration extends Configuration {
 
     private Boolean addAIResponseToContext = true;
     private Integer aiResponseChoiceIndex = 0;
+
+    private Boolean store;
+    private ReasoningEffort reasoningEffort;
+    private Map<String, String> metadata;
     private Float frequencyPenalty;
     private HashMap<String, Integer> logitBias;
     private Boolean logprobs;
     private Integer topLogprobs;
+    @Deprecated()
     private Integer maxTokens;
+    private Integer maxCompletionTokens;
     private Integer choices;
     private Float presencePenalty;
     private Integer seed;
@@ -39,6 +48,10 @@ public class ChatCompletionConfiguration extends Configuration {
     private String toolChoice;
     private Boolean parallelToolCalls;
     private String user;
+
+    public void setModel(ChatCompletionModel model) {
+        this.setModel(model.getIdentifier());
+    }
 
     public void addTool(Tool tool) {
         if(tools == null) {

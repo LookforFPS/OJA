@@ -9,6 +9,7 @@ import me.lookforfps.oja.chatcompletion.model.streaming.StreamOptions;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -16,11 +17,16 @@ import java.util.List;
 public class ChatCompletionRequestDto {
     private String model;
     private List<Message> messages;
+    private Boolean store;
+    private String reasoning_effort;
+    private Map<String, String> metadata;
     private Float frequency_penalty;
     private HashMap<String, Integer> logit_bias;
     private Boolean logprobs;
     private Integer top_logprobs;
+    @Deprecated
     private Integer max_tokens;
+    private Integer max_completion_tokens;
     private Integer n;
     private Float presence_penalty;
     private ResponseFormat response_format;

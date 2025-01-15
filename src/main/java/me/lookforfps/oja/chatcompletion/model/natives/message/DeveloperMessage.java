@@ -8,25 +8,25 @@ import me.lookforfps.oja.chatcompletion.model.natives.message.content.Content;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class UserMessage extends Message {
+public class DeveloperMessage extends Message {
 
     private Content content;
     private String name;
 
-    public UserMessage(Content content, String name) {
-        super(MessageRole.USER);
+    public DeveloperMessage(Content content, String name) {
+        super(MessageRole.DEVELOPER);
         this.content = content;
         this.name = name;
     }
-    public UserMessage(String content, String name) {
+
+    public DeveloperMessage(String content, String name) {
         this(Content.createTextContent(content), name);
     }
 
-    public UserMessage(Content content) {
+    public DeveloperMessage(Content content) {
         this(content, null);
     }
-    public UserMessage(String content) {
+    public DeveloperMessage(String content) {
         this(content, null);
     }
-
 }

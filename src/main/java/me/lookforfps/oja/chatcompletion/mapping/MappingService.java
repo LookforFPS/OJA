@@ -8,12 +8,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import me.lookforfps.oja.chatcompletion.model.natives.message.*;
+import me.lookforfps.oja.chatcompletion.model.natives.message.content.*;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ChatCompletionRequestDto;
-import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponseDto;
+import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponse;
 import me.lookforfps.oja.chatcompletion.model.natives.response.Choice;
 import me.lookforfps.oja.chatcompletion.model.natives.logprobs.LogProbs;
 import me.lookforfps.oja.chatcompletion.model.streaming.chunk.Chunk;
-import me.lookforfps.oja.chatcompletion.model.streaming.chunk.ChunkDto;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,11 +31,11 @@ public class MappingService {
         this.objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
     }
 
-    public String responseDtoToString(ChatCompletionResponseDto responseDto) throws JsonProcessingException {
-        return objectWriter.writeValueAsString(responseDto);
+    public String responseToString(ChatCompletionResponse response) throws JsonProcessingException {
+        return objectWriter.writeValueAsString(response);
     }
 
-    public String requestDtoToString(ChatCompletionRequestDto requestDto) throws JsonProcessingException {
+    public String requestToString(ChatCompletionRequestDto requestDto) throws JsonProcessingException {
         return objectWriter.writeValueAsString(requestDto);
     }
 
@@ -43,27 +43,26 @@ public class MappingService {
         return objectWriter.writeValueAsBytes(requestDto);
     }
 
-    public ChatCompletionResponseDto bytesToResponseDto(byte[] bytes) throws IOException {
-        return bytesToChatCompletionResponseDto(bytes);
+    public ChatCompletionResponse bytesToResponse(byte[] bytes) throws IOException {
+        return bytesToChatCompletionResponse(bytes);
     }
 
     public Chunk bytesToChunk(byte[] chunkBytes) throws IOException {
-        ChunkDto chunkDto = objectMapper.readValue(chunkBytes, ChunkDto.class);
-        return chunkDtoToChunk(chunkDto);
+        return objectMapper.readValue(chunkBytes, Chunk.class);
     }
 
-    private ChatCompletionResponseDto bytesToChatCompletionResponseDto(byte[] bytes) throws IOException {
+    private ChatCompletionResponse bytesToChatCompletionResponse(byte[] bytes) throws IOException {
         JsonNode responseJsonNode = objectMapper.readTree(bytes);
         List<Choice> choices = jsonNodesToChoiceList(responseJsonNode.get("choices"));
 
         ((ObjectNode) responseJsonNode).set("choices", objectMapper.readTree("[]"));
         bytes = objectMapper.writeValueAsBytes(responseJsonNode);
 
-        ChatCompletionResponseDto responseDto = objectMapper.readValue(bytes, ChatCompletionResponseDto.class);
+        ChatCompletionResponse response = objectMapper.readValue(bytes, ChatCompletionResponse.class);
 
-        responseDto.setChoices(choices);
+        response.setChoices(choices);
 
-        return responseDto;
+        return response;
     }
 
 
@@ -96,32 +95,73 @@ public class MappingService {
         return choice;
     }
 
+    private Content jsonNodeToContent(JsonNode contentJsonNode) throws JsonProcessingException {
+        Content content = new Content();
+
+        if(contentJsonNode.isArray()) {
+            for(JsonNode contentEntryJsonNode : contentJsonNode) {
+                ContentEntry contentEntry = jsonNodeToContentEntry(contentEntryJsonNode);
+                content.add(contentEntry);
+            }
+            return content;
+        } else {
+            return null;
+        }
+    }
+
+    private ContentEntry jsonNodeToContentEntry(JsonNode contentEntryJsonNode) throws JsonProcessingException {
+        ContentEntry contentEntry = new ContentEntry();
+
+        ContentType contentType = ContentType.fromIdentifier(contentEntryJsonNode.get("type").asText());
+
+        assert contentType != null;
+        if(contentType.equals(ContentType.TEXT)) {
+            contentEntry = objectMapper.treeToValue(contentEntryJsonNode, TextContent.class);
+        }
+        if(contentType.equals(ContentType.IMAGE_URL)) {
+            contentEntry = objectMapper.treeToValue(contentEntryJsonNode, ImageContent.class);
+        }
+        if(contentType.equals(ContentType.REFUSAL)) {
+            contentEntry = objectMapper.treeToValue(contentEntryJsonNode, RefusalContent.class);
+        }
+
+        return contentEntry;
+    }
+
     private Message jsonNodeToMessage(JsonNode messageJsonNode) throws JsonProcessingException {
         MessageRole role = MessageRole.fromIdentifier(messageJsonNode.get("role").asText());
         assert role != null;
         if(role.equals(MessageRole.SYSTEM)) {
             return objectMapper.treeToValue(messageJsonNode, SystemMessage.class);
+        } else if(role.equals(MessageRole.DEVELOPER)) {
+            return objectMapper.treeToValue(messageJsonNode, DeveloperMessage.class);
         } else if(role.equals(MessageRole.USER)) {
             return objectMapper.treeToValue(messageJsonNode, UserMessage.class);
         } else if(role.equals(MessageRole.ASSISTANT)) {
-            return objectMapper.treeToValue(messageJsonNode, AssistantMessage.class);
+            if(messageJsonNode.has("content")) {
+                if(messageJsonNode.get("content").isArray()) {
+                    Content content = jsonNodeToContent(messageJsonNode.get("content"));
+
+                    ((ObjectNode) messageJsonNode).set("content", objectMapper.readTree("[]"));
+                    AssistantMessage assistantMessage = objectMapper.treeToValue(messageJsonNode, AssistantMessage.class);
+                    assistantMessage.setContent(content);
+
+                    return assistantMessage;
+                } else {
+                    Content content = Content.createTextContent(messageJsonNode.get("content").asText());
+
+                    ((ObjectNode) messageJsonNode).set("content", objectMapper.readTree("[]"));
+                    AssistantMessage assistantMessage = objectMapper.treeToValue(messageJsonNode, AssistantMessage.class);
+                    assistantMessage.setContent(content);
+
+                    return assistantMessage;
+                }
+            } else {
+                return objectMapper.treeToValue(messageJsonNode, AssistantMessage.class);
+            }
         } else if(role.equals(MessageRole.TOOL)) {
             return objectMapper.treeToValue(messageJsonNode, ToolMessage.class);
         }
         return null;
-    }
-
-    private Chunk chunkDtoToChunk(ChunkDto chunkDto) {
-        Chunk chunk = new Chunk();
-        chunk.setId(chunkDto.getId());
-        chunk.setUsedModel(chunkDto.getModel());
-        chunk.setObject(chunkDto.getObject());
-        chunk.setCreated(chunkDto.getCreated());
-        chunk.setServiceTier(chunkDto.getService_tier());
-        chunk.setUsage(chunkDto.getUsage());
-        chunk.setSystemFingerprint(chunkDto.getSystem_fingerprint());
-        chunk.setChoices(chunkDto.getChoices());
-
-        return chunk;
     }
 }

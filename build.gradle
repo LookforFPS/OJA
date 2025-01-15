@@ -5,7 +5,7 @@ plugins {
 
 project.group = 'me.lookforfps'
 project.description = "OpenAI Java API"
-project.version = new Version("1", "0", "2")
+project.version = new Version("1", "1", "0")
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -17,13 +17,14 @@ repositories {
 }
 
 dependencies {
-    compileOnly libs.org.projectlombok.lombok
-    annotationProcessor libs.org.projectlombok.lombok
-    testCompileOnly libs.org.projectlombok.lombok
-    testAnnotationProcessor libs.org.projectlombok.lombok
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+    testCompileOnly libs.lombok
+    testAnnotationProcessor libs.lombok
 
-    api libs.com.fasterxml.jackson.core.jackson.databind
-    api libs.org.slf4j.slf4j.api
+    api libs.jackson.databind
+    api libs.slf4j
+    api libs.okhttp
 }
 
 publishing {

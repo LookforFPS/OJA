@@ -12,5 +12,6 @@ public class Usage {
     private Integer prompt_tokens;
     private Integer completion_tokens;
     private Integer total_tokens;
+    private PromptTokenDetails prompt_tokens_details;
     private CompletionTokenDetails completion_tokens_details;
 }

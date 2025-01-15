@@ -1,4 +1,4 @@
-package me.lookforfps.oja.chatcompletion.model.natives.message.content;
+package me.lookforfps.oja.moderation.model.input.inputentry;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,5 +9,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ImageURL {
     private String url;
-    private String detail;
 }

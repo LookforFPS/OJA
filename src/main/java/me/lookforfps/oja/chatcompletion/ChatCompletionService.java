@@ -1,16 +1,16 @@
 package me.lookforfps.oja.chatcompletion;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import me.lookforfps.oja.aimodel.ChatCompletionModel;
 import me.lookforfps.oja.chatcompletion.event.*;
 import me.lookforfps.oja.chatcompletion.hook.StreamEmitter;
 import me.lookforfps.oja.chatcompletion.config.ChatCompletionConfiguration;
 import me.lookforfps.oja.chatcompletion.model.natives.message.AssistantMessage;
 import me.lookforfps.oja.chatcompletion.model.natives.request.ChatCompletionRequestDto;
-import me.lookforfps.oja.chatcompletion.model.natives.request.ResponseFormat;
 import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponse;
-import me.lookforfps.oja.chatcompletion.model.natives.response.ChatCompletionResponseDto;
 import me.lookforfps.oja.chatcompletion.model.natives.message.Message;
 import me.lookforfps.oja.chatcompletion.hook.StreamContainer;
 import me.lookforfps.oja.chatcompletion.model.streaming.StreamOptions;
@@ -19,15 +19,18 @@ import me.lookforfps.oja.chatcompletion.model.streaming.chunk.Chunk;
 import me.lookforfps.oja.chatcompletion.model.streaming.Stream;
 import me.lookforfps.oja.chatcompletion.hook.StreamListener;
 import me.lookforfps.oja.chatcompletion.mapping.MappingService;
+import me.lookforfps.oja.error.ErrorHandler;
+import me.lookforfps.oja.error.exception.ApiErrorException;
+import me.lookforfps.oja.error.exception.RequestErrorException;
+import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 @Slf4j
 public class ChatCompletionService {
@@ -38,11 +41,14 @@ public class ChatCompletionService {
     @Getter
     @Setter
     private List<Message> context = new ArrayList<>();
+
     private final MappingService mappingService;
+    private final ErrorHandler errorHandler;
 
     private ChatCompletionService(ChatCompletionConfiguration configuration) {
         this.config = configuration;
         this.mappingService = new MappingService();
+        this.errorHandler = new ErrorHandler();
     }
 
     public static ChatCompletionService build(String apiToken, String modelIdentifier, ChatCompletionConfiguration configuration) {
@@ -58,43 +64,60 @@ public class ChatCompletionService {
             return null;
         }
     }
+    public static ChatCompletionService build(String apiToken, ChatCompletionModel model, ChatCompletionConfiguration configuration) {
+        return build(apiToken, model.getIdentifier(), configuration);
+    }
     public static ChatCompletionService build(ChatCompletionConfiguration configuration) {
         return build(configuration.getApiToken(), configuration.getModel(), configuration);
+    }
+    public static ChatCompletionService build(String apiToken, ChatCompletionModel model) {
+        return build(apiToken, model.getIdentifier(), null);
     }
     public static ChatCompletionService build(String apiToken, String modelIdentifier) {
         return build(apiToken, modelIdentifier, null);
     }
 
-    public ChatCompletionResponse sendRequest() throws IOException {
-        config.setStream(false);
 
-        byte[] request = buildRequest();
-        HttpURLConnection con = buildConnection();
+    public ChatCompletionResponse sendRequest() throws ApiErrorException, RequestErrorException {
+        config.setStream(null);
 
-        con.getOutputStream().write(request);
+        OkHttpClient client = new OkHttpClient();
 
-        String output = new BufferedReader(new InputStreamReader(con.getInputStream())).lines()
-                .reduce((a, b) -> a + b).get();
+        try {
+            RequestBody requestBody = buildRequestBody();
+            Request request = buildRequest(requestBody);
 
-        con.disconnect();
+            Response response = client.newCall(request).execute();
 
-        ChatCompletionResponse response = buildResponse(output);
+            if(response.code() == 200) {
+                ChatCompletionResponse ccResponse = buildResponseContent(response.body().string());
 
-        if(config.getAddAIResponseToContext()) {
-            AssistantMessage message = response.getChoices().get(config.getAiResponseChoiceIndex()).getMessage().asAssistantMessage();
-            if(message != null) {
-                addMessage(new AssistantMessage(message.getContent(), message.getTool_calls()));
+                if(config.getAddAIResponseToContext()) {
+                    AssistantMessage message = ccResponse.getChoices().get(config.getAiResponseChoiceIndex()).getMessage().asAssistantMessage();
+                    if(message != null) {
+                        addMessage(new AssistantMessage(message.getContent(), message.getTool_calls()));
+                    }
+                }
+                return ccResponse;
+            } else {
+                errorHandler.handleApiError(response);
+                return null;
             }
+        } catch (UnknownHostException ex) {
+            log.error("DNS resolution failed: {}", ex.getMessage());
+            errorHandler.handleRequestError(ex);
+            return null;
+        } catch (IOException ex) {
+            log.error("I/O error during request: {}", ex.getMessage());
+            errorHandler.handleRequestError(ex);
+            return null;
         }
-
-        return response;
     }
 
-    public Stream sendStreamRequest() throws IOException {
+    public Stream sendStreamRequest() {
         return sendStreamRequest(null);
     }
-
-    public Stream sendStreamRequest(StreamListener listener) throws IOException {
+    public Stream sendStreamRequest(StreamListener listener) {
         config.setStream(true);
 
         StreamContainer streamContainer = new StreamContainer();
@@ -103,54 +126,86 @@ public class ChatCompletionService {
             stream.addStreamListener(listener);
         }
 
-        Thread streamThread = new Thread(() -> {
-            try {
-                byte[] request = buildRequest();
-                HttpURLConnection con = buildConnection();
+        OkHttpClient client = new OkHttpClient();
 
-                con.getOutputStream().write(request);
+        try {
+            RequestBody requestBody = buildRequestBody();
+            Request request = buildRequest(requestBody);
 
-                Scanner scanner = new Scanner(con.getInputStream());
-                while (scanner.hasNextLine()) {
-                    if(classifyChunk(streamContainer, scanner.nextLine())) {
-                        break;
+            client.newCall(request).enqueue(new Callback() {
+
+                @Override
+                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+
+                    if(response.code() == 200) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(response.body().byteStream()));
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            if(classifyChunk(streamContainer, line)) {
+                                break;
+                            }
+                        }
+
+                        if(config.getAddAIResponseToContext()) {
+                            Choice choice = streamContainer.getChunkResult().getChoices().get(config.getAiResponseChoiceIndex());
+                            if(choice != null && choice.getDelta() != null) {
+                                addMessage(new AssistantMessage(choice.getDelta().getContent(), choice.getDelta().getTool_calls()));
+                            }
+                        }
+
+                        StreamStoppedEvent streamStoppedEvent = new StreamStoppedEvent(streamContainer.getChunkResult());
+                        StreamEmitter.emitStreamStopped(streamStoppedEvent, streamContainer.getListeners());
+                        log.debug("Stream stopped");
+                    } else {
+                        errorHandler.handleApiError(response, streamContainer);
                     }
                 }
-                scanner.close();
-                con.disconnect();
 
-                if(config.getAddAIResponseToContext()) {
-                    Choice choice = streamContainer.getChunkResult().getChoices().get(config.getAiResponseChoiceIndex());
-                    if(choice != null && choice.getDelta() != null) {
-                        addMessage(new AssistantMessage(choice.getDelta().getContent(), choice.getDelta().getTool_calls()));
+                @Override
+                public void onFailure(@NotNull Call call, @NotNull IOException ex) {
+                    if(ex.getClass().equals(UnknownHostException.class)) {
+                        log.error("DNS resolution failed: {}", ex.getMessage());
+                        errorHandler.handleRequestError(ex, streamContainer);
+                    } else if (ex.getClass().equals(IOException.class)) {
+                        log.error("I/O error during request: {}", ex.getMessage());
+                        errorHandler.handleRequestError(ex, streamContainer);
                     }
                 }
+            });
 
-                StreamStoppedEvent streamStoppedEvent = new StreamStoppedEvent(streamContainer.getChunkResult());
-                StreamEmitter.emitStreamStopped(streamStoppedEvent, streamContainer.getListeners());
-                log.debug("stream stopped");
-            } catch(IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        streamThread.setName("ChatCompletion-Stream");
-        streamThread.start();
-
-
-        return stream;
+            return stream;
+        } catch (IOException ex) {
+            log.error("I/O error during request: {}", ex.getMessage());
+            errorHandler.handleRequestError(ex, streamContainer);
+            return null;
+        }
     }
 
-    private byte[] buildRequest() throws IOException {
+    private Request buildRequest(RequestBody requestBody) throws JsonProcessingException {
+        return new Request.Builder()
+                .url(config.getApiUrl())
+                .addHeader("Authorization", "Bearer " + config.getApiToken())
+                .post(requestBody)
+                .build();
+    }
+
+    private RequestBody buildRequestBody() throws JsonProcessingException {
         ChatCompletionRequestDto requestDto = new ChatCompletionRequestDto();
 
         requestDto.setModel(config.getModel());
         requestDto.setMessages(context);
 
+        requestDto.setStore(config.getStore());
+        if(config.getReasoningEffort() != null) {
+            requestDto.setReasoning_effort(config.getReasoningEffort().getIdentifier());
+        }
+        requestDto.setMetadata(config.getMetadata());
         requestDto.setFrequency_penalty(config.getFrequencyPenalty());
         requestDto.setLogit_bias(config.getLogitBias());
         requestDto.setLogprobs(config.getLogprobs());
         requestDto.setTop_logprobs(config.getTopLogprobs());
         requestDto.setMax_tokens(config.getMaxTokens());
+        requestDto.setMax_completion_tokens(config.getMaxCompletionTokens());
         requestDto.setN(config.getChoices());
         requestDto.setPresence_penalty(config.getPresencePenalty());
         requestDto.setResponse_format(config.getResponseFormat());
@@ -170,56 +225,35 @@ public class ChatCompletionService {
         requestDto.setParallel_tool_calls(config.getParallelToolCalls());
         requestDto.setUser(config.getUser());
 
-        log.debug("requestDto: " + mappingService.requestDtoToString(requestDto));
+        byte[] requestContent = mappingService.requestDtoToBytes(requestDto);
+        log.debug("requestDto: {}", new String(requestContent));
 
-        return mappingService.requestDtoToBytes(requestDto);
+        return RequestBody.create(requestContent, MediaType.get("application/json"));
     }
 
-    private HttpURLConnection buildConnection() throws IOException {
-        HttpURLConnection con = (HttpURLConnection) new URL(config.getApiUrl()).openConnection();
+    private ChatCompletionResponse buildResponseContent(String rawResponse) throws IOException {
+        log.debug("rawResponse: {}", rawResponse);
 
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("Authorization", "Bearer " + config.getApiToken());
-
-        con.setDoOutput(true);
-        return con;
-    }
-
-    private ChatCompletionResponse buildResponse(String rawResponse) throws IOException {
-        log.debug("rawResponse: "+rawResponse);
-
-        ChatCompletionResponseDto responseDto = mappingService.bytesToResponseDto(rawResponse.getBytes());
-        log.debug("processedResponseDto: "+ mappingService.responseDtoToString(responseDto));
-
-        ChatCompletionResponse response = new ChatCompletionResponse();
-
-        response.setId(responseDto.getId());
-        response.setObjectType(responseDto.getObject());
-        response.setCreated(responseDto.getCreated());
-        response.setUsedModel(responseDto.getModel());
-        response.setSystemFingerprint(responseDto.getSystem_fingerprint());
-        response.setUsage(responseDto.getUsage());
-        response.setChoices(responseDto.getChoices());
-        response.setServiceTier(responseDto.getService_tier());
+        ChatCompletionResponse response = mappingService.bytesToResponse(rawResponse.getBytes());
+        log.debug("processedResponse: {}", mappingService.responseToString(response));
 
         return response;
     }
 
     private boolean classifyChunk(StreamContainer streamContainer, String rawChunk) throws IOException {
         String output = rawChunk.replace("data: ", "");
-        log.debug("chunkResponse: "+output);
+        log.debug("chunkResponse: {}", output);
 
         if(output.equalsIgnoreCase("[DONE]")) {
             StreamFinishedEvent streamFinishedEvent = new StreamFinishedEvent(streamContainer.getChunkResult(), streamContainer.getChunkResult().getChoices().get(0).getFinish_reason());
             StreamEmitter.emitStreamFinished(streamFinishedEvent, streamContainer.getListeners());
-            log.debug("stream finished");
+            log.debug("Stream finished");
             return true;
         } else if(output.startsWith("{")) {
             Chunk chunk = mappingService.bytesToChunk(output.getBytes());
             classifyChunkContent(streamContainer, chunk);
         } else {
-            log.debug("empty chunk skipped");
+            log.debug("Empty chunk skipped");
         }
         return false;
     }
