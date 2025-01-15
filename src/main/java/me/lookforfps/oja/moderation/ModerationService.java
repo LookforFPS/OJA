@@ -14,6 +14,7 @@ import me.lookforfps.oja.moderation.model.input.MultiModalInput;
 import me.lookforfps.oja.moderation.model.input.StringArrayInput;
 import me.lookforfps.oja.moderation.model.input.StringInput;
 import me.lookforfps.oja.moderation.model.input.inputentry.ImageInputEntry;
+import me.lookforfps.oja.moderation.model.input.inputentry.ImageURL;
 import me.lookforfps.oja.moderation.model.input.inputentry.InputEntry;
 import me.lookforfps.oja.moderation.model.input.inputentry.TextInputEntry;
 import me.lookforfps.oja.moderation.model.request.ModerationRequestDto;
@@ -22,6 +23,7 @@ import okhttp3.*;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -72,6 +74,11 @@ public class ModerationService {
 
         return sendRequest(requestDto);
     }
+    public ModerationResponse sendRequest(ImageURL input) throws ApiErrorException, RequestErrorException {
+        ModerationRequestDto requestDto = buildInput(input);
+
+        return sendRequest(requestDto);
+    }
     public ModerationResponse sendRequest(List<?> input) throws ApiErrorException, RequestErrorException {
         ModerationRequestDto requestDto = buildInput(input);
 
@@ -106,6 +113,15 @@ public class ModerationService {
     private ModerationRequestDto buildInput(String input) {
         if(input!=null) {
             return new StringInput(input);
+        } else {
+            throw new InputNotSupportedException("Moderation input is null! This is not supported!");
+        }
+    }
+    private ModerationRequestDto buildInput(ImageURL imageURL) {
+        if(imageURL!=null) {
+            ArrayList<ImageInputEntry> imageInputEntries = new ArrayList<>();
+            imageInputEntries.add(ImageInputEntry.createImageEntry(imageURL.getUrl()));
+            return buildInput(imageInputEntries);
         } else {
             throw new InputNotSupportedException("Moderation input is null! This is not supported!");
         }

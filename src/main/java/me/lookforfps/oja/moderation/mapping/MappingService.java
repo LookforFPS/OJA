@@ -50,7 +50,7 @@ public class MappingService {
 
         ModerationResponse response = objectMapper.readValue(bytes, ModerationResponse.class);
 
-        response.setResults(results);
+        response.setAllResults(results);
 
         return response;
     }

@@ -1,22 +1,29 @@
 package me.lookforfps.oja.moderation.model.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import me.lookforfps.oja.moderation.model.results.Result;
 
 import java.util.List;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ModerationResponse {
 
+    @Getter
+    @Setter
     private String id;
+    @Getter
+    @Setter
     private String model;
     private List<Result> results;
 
-    public Result getFirstResult() {
+    public List<Result> getAllResults() {
+        return results;
+    }
+    public void setAllResults(List<Result> results) {
+        this.results = results;
+    }
+    public Result getResult() {
         return results.get(0);
     }
 
