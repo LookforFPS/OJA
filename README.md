@@ -76,7 +76,7 @@ Then we send the request with the content we wish to convert into embeddings.
 EmbeddingService service = EmbeddingService.build("put$your#api%token§here", EmbeddingModel.TEXT_EMBEDDING_3_LARGE.getIdentifier());
 
 EmbeddingResponse response = service.sendRequest("something you want to convert");
-System.out.println("Embedding: "+embeddingResponse.getFloatEmbedding());
+System.out.println("Embedding: "+response.getFloatEmbedding());
 ```
 
 ### Moderation
