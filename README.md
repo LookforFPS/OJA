@@ -84,7 +84,7 @@ System.out.println("Embedding: "+response.getFloatEmbedding());
 First, we build a `ModerationService` according to our needs.
 Then we send the request with the content we want to moderate.
 ```java
-ModerationService service = ModerationService.build("put$your#api%token§here");
+ModerationService service = ModerationService.build("put$your#api%token§here", ModerationModel.OMNI_MODERATION_LATEST);
 
 ModerationResponse response = service.sendRequest("content you want to check for moderation rules");
 System.out.println("Flagged: "+response.getResult().getFlagged());
