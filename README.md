@@ -1,15 +1,18 @@
 # OJA (OpenAI Java API)
 
 [version]: https://img.shields.io/github/v/release/lookforfps/oja?label=Version
-[wiki-docs]: https://img.shields.io/badge/Wiki-Docs-%2368CBB0
 [licence]: https://img.shields.io/github/license/lookforfps/oja?label=Licence&color=%23fff
+[build]: https://img.shields.io/github/actions/workflow/status/lookforfps/oja/validation.yml
+[wiki-docs]: https://img.shields.io/badge/Wiki-Docs-%2368CBB0
 
-[wiki-docs-link]: https://oja.lookforfps.dev/introduction/oja/
+[build-link]: https://github.com/LookforFPS/OJA/actions/workflows/validation.yml
 [licence-link]: https://github.com/LookforFPS/OJA/blob/main/LICENSE.md
+[wiki-docs-link]: https://oja.lookforfps.dev/introduction/oja/
 
 [![version][]]()
-[![wiki-docs][]][wiki-docs-link]
 [![licence][]][licence-link]
+[![build][]][build-link]
+[![wiki-docs][]][wiki-docs-link]
 
 OJA is an open-source Java library designed to simplify the integration of OpenAI's API into Java environments.
 It allows developers to easily use OpenAI's AI models for tasks like chat completions, embeddings and moderation.
