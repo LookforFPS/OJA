@@ -50,7 +50,7 @@ repositories {
 ```
 ```groovy
 dependencies {
-    implementation "dev.lookforfps:OJA:version"
+    implementation "dev.lookforfps.oja:OJA:version"
 }
 ```
 
@@ -66,7 +66,7 @@ repositories {
 
 ```kotlin
 dependencies {
-    implementation("dev.lookforfps:OJA:version")
+    implementation("dev.lookforfps.oja:OJA:version")
 }
 ```
 
