@@ -17,6 +17,11 @@
 OJA is an open-source Java library designed to simplify the integration of OpenAI's API into Java environments.
 It allows developers to easily use OpenAI's AI models for tasks like chat completions, embeddings and moderation.
 
+## ⚠️ Project Status
+**This project is no longer actively maintained.**
+
+However, I may still address critical issues or bugs from time to time, as I continue to use the library in some of my personal projects.
+
 ## Installation
 
 Since OJA is currently not available on Maven Central, you will need to specify a custom repository.
