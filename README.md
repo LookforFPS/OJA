@@ -32,13 +32,15 @@ Apart from that, OJA can be integrated into your software just like any other pa
 
 ```xml
 <dependency>
-    <groupId>me.lookforfps</groupId>
+    <groupId>dev.lookforfps.oja</groupId>
     <artifactId>OJA</artifactId>
     <version>version</version>
 </dependency>
 ```
 
 ### Gradle
+Groovy DSL
+
 ```groovy
 repositories {
     maven {
@@ -46,10 +48,25 @@ repositories {
     }
 }
 ```
-
 ```groovy
 dependencies {
-    implementation("me.lookforfps:OJA:version")
+    implementation "dev.lookforfps:OJA:version"
+}
+```
+
+Kotlin DSL
+
+```kotlin
+repositories {
+    maven {
+        url = uri("https://repo.lookforfps.dev/repository/maven-public")
+    }
+}
+```
+
+```kotlin
+dependencies {
+    implementation("dev.lookforfps:OJA:version")
 }
 ```
 
