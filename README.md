@@ -31,7 +31,7 @@ Apart from that, OJA can be integrated into your software just like any other pa
 ```xml
 <repository>
     <id>lookforfps</id>
-    <url>https://repo.lookforfps.dev/repository/maven-public</url>
+    <url>https://repo.lookforfps.net/repository/maven-public</url>
 </repository>
 ```
 
@@ -49,7 +49,7 @@ Groovy DSL
 ```groovy
 repositories {
     maven {
-        url "https://repo.lookforfps.dev/repository/maven-public"
+        url "https://repo.lookforfps.net/repository/maven-public"
     }
 }
 ```
@@ -64,7 +64,7 @@ Kotlin DSL
 ```kotlin
 repositories {
     maven {
-        url = uri("https://repo.lookforfps.dev/repository/maven-public")
+        url = uri("https://repo.lookforfps.net/repository/maven-public")
     }
 }
 ```
