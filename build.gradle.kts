@@ -70,7 +70,7 @@ publishing {
     repositories {
         maven {
             name = "nexus"
-            url = uri("https://repo.lookforfps.dev/repository/maven-releases/")
+            url = uri("https://repo.lookforfps.net/repository/maven-releases/")
             credentials {
                 username = project.findProperty("user") as String? ?: System.getenv("USERNAME")
                 password = project.findProperty("token") as String? ?: System.getenv("TOKEN")
