@@ -18,14 +18,13 @@ repositories {
 }
 
 dependencies {
-    compileOnly(libs.lombok)
-    annotationProcessor(libs.lombok)
-    testCompileOnly(libs.lombok)
-    testAnnotationProcessor(libs.lombok)
-
     implementation(libs.jackson.databind)
-    implementation(libs.slf4j)
     implementation(libs.okhttp)
+    implementation(libs.slf4j)
+
+    compileOnly(libs.lombok)
+
+    annotationProcessor(libs.lombok)
 }
 
 publishing {
