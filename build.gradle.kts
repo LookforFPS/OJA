@@ -5,7 +5,7 @@ plugins {
 
 group = "dev.lookforfps.oja"
 description = "OpenAI Java API"
-version = Version("1", "2", "1")
+version = Version(1, 2, 1)
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -81,9 +81,9 @@ publishing {
 
 
 data class Version(
-    val major: String,
-    val minor: String,
-    val revision: String,
+    val major: Number,
+    val minor: Number,
+    val revision: Number,
     val classifier: String? = null
 ) {
     override fun toString(): String {
