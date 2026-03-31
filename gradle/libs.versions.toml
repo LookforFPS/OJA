@@ -1,7 +1,7 @@
 
 [versions]
-jackson-databind = "2.20.1"
-lombok = "1.18.42"
+jackson-databind = "2.21.2"
+lombok = "1.18.44"
 slf4j = "2.0.17"
 okhttp = "5.3.2"
 
