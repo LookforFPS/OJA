@@ -4,9 +4,12 @@ import lombok.Getter;
 
 @Getter
 public enum ReasoningEffort {
+    NONE("none"),
+    MINIMAL("minimal"),
     LOW("low"),
     MEDIUM("medium"),
-    HIGH("high");
+    HIGH("high"),
+    XHIGH("xhigh");
 
     private String identifier;
 
