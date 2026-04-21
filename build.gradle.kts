@@ -5,7 +5,7 @@ plugins {
 
 group = "dev.lookforfps.oja"
 description = "OpenAI Java API"
-version = Version(1, 2, 2)
+version = Version(1, 2, 3)
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
